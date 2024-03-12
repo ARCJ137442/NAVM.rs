@@ -28,7 +28,10 @@ pub(crate) struct LexicalCmdParseMap {
 }
 
 impl LexicalCmdParseMap {
-    pub(crate) fn new<'a>(map: HashMap<String, LexicalParamsParseFn>, default_parse_fn: impl Fn(&str) -> Vec<&str>) -> Self {
+
+    /// 构造函数
+    /// * ⚠️闭包的生命周期必须得是静态的
+    pub(crate) fn new<'a>(map: HashMap<String, LexicalParamsParseFn>, default_parse_fn: impl Fn(&str) -> Vec<&str> + 'static) -> Self {
         Self { map, default_parse_fn: Box::new(default_parse_fn) }
     }
 }
