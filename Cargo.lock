@@ -3,6 +3,13 @@
 version = 3
 
 [[package]]
+name = "enum_narsese"
+version = "0.4.3"
+dependencies = [
+ "nar_dev_utils",
+]
+
+[[package]]
 name = "nar_dev_utils"
 version = "0.1.0"
 
@@ -10,5 +17,6 @@ version = "0.1.0"
 name = "navm"
 version = "0.1.0"
 dependencies = [
+ "enum_narsese",
  "nar_dev_utils",
 ]

@@ -1,8 +1,10 @@
 //! 建立NAVM指令的数据结构
 
+use enum_narsese::lexical::LexicalNarsese;
+
 /// ! 暂时使用[`String`]作为Narsese对象的占位符
 ///   * 后续需要更结构化的数据，可能[`LexicalNarsese`]是首选
-pub type Narsese = String;
+pub type Narsese = LexicalNarsese;
 
 /// NAVM指令 数据结构
 #[derive(Debug, Clone, PartialEq, Eq)]

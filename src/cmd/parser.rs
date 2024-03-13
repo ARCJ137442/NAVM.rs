@@ -55,7 +55,6 @@ fn to_parse_error(e: impl Error) -> ParseError {
 impl super::Cmd {
 
     /// 从字符串构造NAVM指令
-    /// TODO: NAVM指令→NAVM指令
     pub fn parse(line: &str) -> Result<Self, ParseError> {
         // 拆分字符串为两个部分
         let (head, params) = line.split_once(char::is_whitespace).ok_or(ParseError::new("无法分割出指令头！"))?;
@@ -85,8 +84,9 @@ impl super::Cmd {
                 Cmd::RES { target }
             }
             "NSE" => {
-                // TODO: 🏗️【2024-03-13 22:13:13】后续预备使用「词法Narsese」存储
-                Cmd::NSE(line.into())
+                // TODO: 🏗️【2024-03-14 01:14:09】等待「词法Narsese」解析器完成
+                todo!()
+                // Cmd::NSE(line.into())
             },
             "NEW" => {
                 // 以空格分隔
