@@ -6,7 +6,7 @@ use navm::{
 struct EchoVM;
 
 impl vm::VM for EchoVM {
-    fn input_cmd(&mut self, cmd: navm::nair::Cmd) {
+    fn input_cmd(&mut self, cmd: navm::cmd::Cmd) {
         println!("输入的指令：{cmd:?}");
     }
 
@@ -39,16 +39,18 @@ fn main() {
     let mut vm = EchoVM;
 
     // 输入指令
-    let c1 = navm::nair::Cmd::SAV {
+    let c1 = navm::cmd::Cmd::SAV {
         target: "test".to_string(),
         path: "test".to_string(),
     };
-    let c2 = navm::nair::Cmd::from_str_params("CUS", "这是一条自定义指令");
+    let c2 = navm::cmd::Cmd::parse_str_params("CUS", "这是一条自定义指令").expect("指令解析失败！");
     vm.input_cmd(c1);
     vm.input_cmd(c2);
 
     // 输出
-    let o = vm::Output::ANSWER { narsese: "<{SELF} --> [good]>".into() };
+    let o = vm::Output::ANSWER {
+        narsese: "<{SELF} --> [good]>".into(),
+    };
     let op = operation!("say" => "{SELF}" "hello, world");
     vm.on_output(o);
     vm.on_output(vm::Output::EXE(op))

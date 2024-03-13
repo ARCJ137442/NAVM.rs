@@ -10,4 +10,4 @@ pub use structs::*;
 
 // 转换
 mod conversion;
-pub use conversion::*;
+pub(crate) use conversion::*;

@@ -9,7 +9,7 @@ use std::{
     thread,
 };
 
-use navm::show;
+use nar_dev_utils::show;
 
 const EXE_PATH_ONA: &str = r"H:\A137442\Develop\AGI\NARS\NARS-executables\NAR.exe";
 const EXE_PATH_REPL: &str = r"H:\A137442\Develop\Julia\语言学小工Ju\繁简转换\dist\repl_简化.exe";
@@ -142,72 +142,6 @@ fn _test_repl_2(mut c: Child, input: &str) {
     // 等待线程执行结束
     t1.join().unwrap();
     t2.join().unwrap();
-}
-
-/// 示例代码来源：https://www.nikbrendler.com/rust-process-communication/
-#[test]
-fn test_example() {
-    use std::io::{BufRead, BufReader, Write};
-    use std::process::{Command, Stdio};
-    use std::sync::mpsc::{channel, Receiver, Sender};
-    use std::sync::Mutex;
-
-    use std::thread;
-    use std::thread::sleep;
-    use std::time::Duration;
-
-    fn start_process(sender: Sender<String>, receiver: Receiver<String>) {
-        let child = Command::new("cat")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .spawn()
-            .expect("Failed to start process");
-
-        println!("Started process: {}", child.id());
-
-        thread::spawn(move || {
-            let mut f = BufReader::new(child.stdout.unwrap());
-            let mut stdin = child.stdin.unwrap();
-            for line in receiver {
-                stdin.write_all(line.as_bytes()).unwrap();
-                let mut buf = String::new();
-                match f.read_line(&mut buf) {
-                    Ok(_) => {
-                        sender.send(buf).unwrap();
-                        continue;
-                    }
-                    Err(e) => {
-                        println!("an error!: {:?}", e);
-                        break;
-                    }
-                }
-            }
-        });
-    }
-
-    fn start_command_thread(mutex: Mutex<Sender<String>>) {
-        thread::spawn(move || {
-            let sender = mutex.lock().unwrap();
-            sleep(Duration::from_secs(3));
-            sender
-                .send(String::from("Command from the thread\n"))
-                .unwrap();
-        });
-    }
-
-    // fn main() {
-    let (tx1, rx1) = channel();
-    let (tx2, rx2) = channel();
-
-    start_process(tx1, rx2);
-
-    tx2.send(String::from("Command 1\n")).unwrap();
-    start_command_thread(Mutex::new(tx2));
-
-    for line in rx1 {
-        println!("Got this back: {}", line);
-    }
-    // }
 }
 
 #[test]

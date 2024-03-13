@@ -2,7 +2,7 @@
 use std::io::{stdin, BufRead, BufReader, BufWriter, Error, ErrorKind, Write};
 use std::process::{ChildStdin, Command, Stdio};
 
-use navm::show;
+use nar_dev_utils::show;
 
 const PROGRAM: &str = r"H:\A137442\Develop\AGI\NARS\NARS-executables\NAR.exe";
 

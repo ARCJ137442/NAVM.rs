@@ -6,3 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# 【2024-03-13 21:17:55】实用库现在独立为`nar_dev_utils`
+# * 【2024-03-13 22:36:05】目前只启用它的宏
+nar_dev_utils = { version = "0.1.0", path = "../NAR-dev-util", features=[] }
