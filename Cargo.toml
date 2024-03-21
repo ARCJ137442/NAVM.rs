@@ -14,9 +14,8 @@ edition = "2021"
 path = "../NAR-dev-util"
 features = []
 
-[dependencies.enum_narsese]
+[dependencies.narsese]
 # ! 本地依赖可以不添加版本
 # 载入Narsese API，引入其中的「词法Narsese」部分
-# TODO: 后续大概需要改名
-path = "../EnumNarsese.rs"
+path = "../Narsese.rs"
 features = ["lexical_narsese"]
