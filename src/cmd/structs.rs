@@ -69,14 +69,3 @@ pub enum Cmd {
     // Custom { cmd: Box<dyn NAVM指令Cmd> },
     Custom { head: String, args_line: String },
 }
-
-// /// 用于兼容枚举之外的自定义指令
-// /// * 📌内涵有待增加
-// pub trait NAVM指令Cmd {
-//     // /// 从字符串解析
-//     // /// * 💭【2024-02-29 00:26:48】似乎不应归特征管
-//     // fn from_str(s: &str) -> Option<Self>;
-
-//     /// 转换为字符串（NAVM指令形式）
-//     fn to_str(&self) -> String;
-// }
