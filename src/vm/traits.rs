@@ -1,7 +1,6 @@
 //! 引入「非公理虚拟机」的特征
 
-use crate::cmd;
-use crate::vm;
+use crate::{cmd, vm};
 
 /// 所有「非公理虚拟机」遵循的特征
 pub trait VM {
