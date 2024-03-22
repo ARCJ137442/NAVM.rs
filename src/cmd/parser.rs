@@ -173,7 +173,7 @@ impl super::Cmd {
             // 自定义：存入「自定义」类型中
             other => Self::Custom {
                 head: other.into(),
-                args_line: line.into(),
+                tail: line.into(),
             },
         })
     }

@@ -1,6 +1,7 @@
 //! 建立NAVM指令的数据结构
 //! * ✨现在对指令[`Cmd::NSE`]引入的是「词法Narsese」，保证所输入Narsese的词法正确性
 //!   * 【2024-03-22 17:34:48】⚠️也有可能是一种限制
+//! * 🚩【2024-03-23 00:18:57】目前这里只定义结构，不定义其实现
 
 use narsese::lexical::Task as LexicalTask;
 
@@ -71,5 +72,78 @@ pub enum Cmd {
     ///   * 📌关键在于「内容完全限定」「后续容易『特殊VM特殊处理』」
     /// * 📌使用正常命名法，以区分其它作为「内置指令」的类型
     // Custom { cmd: Box<dyn NAVM指令Cmd> },
-    Custom { head: String, args_line: String },
+    Custom {
+        /// 自定义的指令头
+        head: String,
+        /// 指令头以外的「指令尾」部分
+        tail: String,
+    },
+}
+
+/// 单元测试
+/// * 🎯产生测试样本集，并以此测试结构构造
+#[cfg(test)]
+pub(crate) mod tests {
+    use super::*;
+    use narsese::{lexical_atom, lexical_budget, lexical_task, lexical_truth};
+
+    /// 产生样本集
+    pub fn samples() -> Vec<Cmd> {
+        vec![
+            Cmd::SAV {
+                target: "target".into(),
+                path: "path".into(),
+            },
+            Cmd::LOA {
+                target: "target".into(),
+                path: "path".into(),
+            },
+            Cmd::RES {
+                target: "target".into(),
+            },
+            Cmd::NSE(lexical_task![
+                lexical_budget!["0.5" "0.5" "0.5"]
+                lexical_atom!("这是一个测试任务")
+                "."
+                ":|:"
+                lexical_truth!["1.0" "0.9"]
+            ]),
+            Cmd::NEW {
+                target: "target".into(),
+            },
+            Cmd::DEL {
+                target: "target".into(),
+            },
+            Cmd::CYC(1),
+            Cmd::VOL(1),
+            Cmd::REG {
+                name: "name".into(),
+            },
+            Cmd::INF {
+                target: "target".into(),
+            },
+            Cmd::HLP {
+                name: "name".into(),
+            },
+            Cmd::REM {
+                comment: "comment".into(),
+            },
+            Cmd::Custom {
+                head: "HEAD".into(),
+                tail: "tail".into(),
+            },
+        ]
+    }
+
+    /// 测试构建
+    #[test]
+    fn test_construct() {
+        // 产生样本集
+        let samples = samples();
+        // 遍历样本集
+        for sample in samples {
+            // 打印
+            println!("{:?}", sample);
+        }
+    }
 }
