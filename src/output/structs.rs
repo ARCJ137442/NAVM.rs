@@ -29,7 +29,7 @@ use narsese::lexical::Narsese as LexicalNarsese;
 /// * 🎯使用枚举，统一对「输出类别」分派
 /// * 📌除其中的[`String`]类型字段，通用于所有具体实现
 ///   * 📄与具体NAVM实现无关
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Output {
     /// 表示「已输入信息」的recall
     /// * 📌该「信息」一般是Narsese字符串

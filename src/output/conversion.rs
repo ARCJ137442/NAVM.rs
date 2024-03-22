@@ -16,9 +16,8 @@
 //! 另请参考其所对接的结构[`OutputJSON`]
 #![allow(unused)]
 
-use narsese::conversion::string::impl_lexical::format_instances::FORMAT_ASCII;
-
 use super::Output;
+use narsese::conversion::string::impl_lexical::format_instances::FORMAT_ASCII;
 
 /// 用于统一存储「JSON化的NAVM输出」的结构
 #[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -136,7 +135,10 @@ impl Output {
             | Output::ACHIEVED { narsese, .. }
             | Output::ANTICIPATE { narsese, .. } => {
                 // * 🚩将内部可能有的Narsese值转换为ASCII CommonNarsese字符串
-                narsese.map(|narsese| FORMAT_ASCII.format_narsese(&narsese))
+                narsese
+                    // 复制以使用
+                    .clone()
+                    .map(|narsese| FORMAT_ASCII.format_narsese(&narsese))
             }
             // ! 使用通配符可能意味着后续「在别的类型中添加了Narsese字段，但不会被处理」的情况
             _ => None,

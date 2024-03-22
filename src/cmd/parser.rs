@@ -3,14 +3,13 @@
 //!
 //! TODO: 有待重构「NSE」指令
 
+use super::Cmd;
 use narsese::{
     conversion::string::impl_lexical::format_instances::FORMAT_ASCII,
     lexical::{Narsese, Task as LexicalTask},
 };
 use std::{error::Error, fmt::Display};
-use util::ResultTransform;
-
-use super::Cmd;
+use util::*;
 
 /// * 📝定长数组非Copy初始化：如果需要在定长数组中初始化一个方法，应该先声明一个const，然后从中初始化
 const EMPTY_STRING: std::string::String = String::new();
