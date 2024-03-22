@@ -1,6 +1,8 @@
 //! 建立NAVM指令的数据结构
+//! * ✨现在对指令[`Cmd::NSE`]引入的是「词法Narsese」，保证所输入Narsese的词法正确性
+//!   * 【2024-03-22 17:34:48】⚠️也有可能是一种限制
 
-use narsese::lexical::Narsese;
+use narsese::lexical::Task as LexicalTask;
 
 /// NAVM指令 数据结构
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -15,13 +17,15 @@ pub enum Cmd {
 
     /// `Reset` | 重置target
     /// 指令：清除CIN数据
-    /// - 如：记忆区、缓冲区……
+    /// * 如：记忆区、缓冲区……
     RES { target: String },
 
     /// 指令：输入「CommonNarsese」语句
-    /// - 不换行
-    /// - 遵循CommonNarsese语法
-    NSE(Narsese),
+    /// * 🚩使用「词法Narsese」（[`narsese::lexical`]）作为数据结构
+    /// * 📌【2024-03-22 17:40:15】此处只使用其中的「任务」结构
+    ///   * 📄目前OpenNARS、ONA、NARS-Python、PyNARS、OpenJunars等均以「任务」作为输入单位
+    ///   * 📌对于「语句」的情况，也可以通过「附加『空预算』」隐式转换为任务
+    NSE(LexicalTask),
 
     /// `New` | 新建target
     /// 指令：创建新推理器
@@ -41,7 +45,7 @@ pub enum Cmd {
 
     /// `Register`
     /// 指令：向CIN注册操作（NAL-8）
-    /// - 📌此处的「操作符名」不带尖号「^」，等价于「原子操作」
+    /// * 📌此处的「操作符名」不带尖号「^」，等价于「原子操作」
     REG { name: String },
 
     /// `Info`
@@ -54,7 +58,7 @@ pub enum Cmd {
 
     /// `Remark`
     /// 指令：注释
-    /// - 📌仅存储内容，后续通常翻译为空字串
+    /// * 📌仅存储内容，后续通常翻译为空字串
     REM { comment: String },
 
     /// `Custom`

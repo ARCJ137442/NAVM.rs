@@ -6,8 +6,11 @@
 //   * 在外部（无法使用`crate`引用`navm`）使用`nar_dev_utils`
 pub extern crate nar_dev_utils as util;
 
-// cmd
+// 指令
 pub mod cmd;
+
+// 输出
+pub mod output;
 
 // NAVM虚拟机
 pub mod vm;

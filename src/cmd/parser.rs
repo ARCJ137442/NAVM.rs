@@ -3,14 +3,19 @@
 //!
 //! TODO: 有待重构「NSE」指令
 
+use narsese::{
+    conversion::string::impl_lexical::format_instances::FORMAT_ASCII,
+    lexical::{Narsese, Task as LexicalTask},
+};
 use std::{error::Error, fmt::Display};
+use util::ResultTransform;
 
 use super::Cmd;
 
 /// * 📝定长数组非Copy初始化：如果需要在定长数组中初始化一个方法，应该先声明一个const，然后从中初始化
 const EMPTY_STRING: std::string::String = String::new();
 /// 封装「获取N个命令参数」的功能
-fn get_cmd_params<const N: usize>(s: &str) -> Result<[String; N], ParseError> {
+fn get_cmd_params<const N: usize>(s: &str) -> ParseResult<[String; N]> {
     let mut split = s.split_whitespace();
 
     // 初始化，拷贝N个空字串
@@ -26,38 +31,61 @@ fn get_cmd_params<const N: usize>(s: &str) -> Result<[String; N], ParseError> {
     Ok(result)
 }
 
-/// 解析错误的类型
-#[derive(Debug)]
-pub struct ParseError(pub String);
+/// 封装「指令解析结果」相关功能
+mod parse_error {
+    use super::*;
 
-impl ParseError {
-    pub fn new(s: &str) -> ParseError {
-        ParseError(s.to_string())
+    /// 解析错误的类型
+    #[derive(Debug)]
+    pub struct ParseError(pub String);
+
+    impl ParseError {
+        pub fn new(s: &str) -> ParseError {
+            ParseError(s.to_string())
+        }
     }
-}
-impl Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "NAVM Cmd ParseError: {}", self.0)
+    impl Display for ParseError {
+        fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            write!(f, "NAVM Cmd ParseError: {}", self.0)
+        }
     }
-}
-impl Error for ParseError {
-    // 本身就只包含描述
-    fn description(&self) -> &str {
-        &self.0
+    impl Error for ParseError {
+        // 本身就只包含描述
+        fn description(&self) -> &str {
+            &self.0
+        }
     }
+
+    /// * 🎯从其它「错误」类型转换到「解析错误」
+    /// * ⚠️实现[`From`]特征会起冲突
+    pub fn to_parse_error(e: impl ToString) -> ParseError {
+        ParseError(e.to_string())
+    }
+
+    /// 简记的类型别名：解析结果
+    pub type ParseResult<T> = Result<T, ParseError>;
 }
-/// * 🎯从其它「错误」类型转换到「解析错误」
-/// * ⚠️实现[`From`]特征会起冲突
-fn to_parse_error(e: impl Error) -> ParseError {
-    ParseError(e.to_string())
+use parse_error::*;
+
+/// 将解析出的「词法Narsese」隐式转换为[`LexicalTask`]
+fn implicit_into_task(narsese: Narsese) -> ParseResult<LexicalTask> {
+    match narsese {
+        Narsese::Task(task) => Ok(task),
+        _ => Err(ParseError(format!(
+            "解析到非任务数据「{}」：{narsese:?}",
+            FORMAT_ASCII.format_narsese(&narsese)
+        ))),
+    }
 }
 
+/// 扩展指令[`Cmd`]类型的功能
 impl super::Cmd {
-
     /// 从字符串构造NAVM指令
-    pub fn parse(line: &str) -> Result<Self, ParseError> {
+    pub fn parse(line: &str) -> ParseResult<Self> {
         // 拆分字符串为两个部分
-        let (head, params) = line.split_once(char::is_whitespace).ok_or(ParseError::new("无法分割出指令头！"))?;
+        let (head, params) = line
+            .split_once(char::is_whitespace)
+            .ok_or(ParseError::new("无法分割出指令头！"))?;
         // 构造指令
         Self::parse_str_params(head, params)
     }
@@ -65,7 +93,7 @@ impl super::Cmd {
     /// 从字符串参数中构造NAVM指令
     /// * 🚩除了「指令头」以外，均为「指令行」
     ///   * ⚠️「指令行」不包括「指令头」
-    pub fn parse_str_params(head: &str, line: &str) -> Result<Self, ParseError> {
+    pub fn parse_str_params(head: &str, line: &str) -> ParseResult<Self> {
         Ok(match head {
             // 内置：各自有各自的处理方法
             "SAV" => {
@@ -84,10 +112,19 @@ impl super::Cmd {
                 Cmd::RES { target }
             }
             "NSE" => {
-                // TODO: 🏗️【2024-03-14 01:14:09】等待「词法Narsese」解析器完成
-                todo!()
-                // Cmd::NSE(line.into())
-            },
+                // 🚩以CommonNarsese ASCII语法解析出「词法Narsese」
+                // * 📌此处旨在统一格式，如`NSE <A --> B>.`
+                // * 📌【2024-03-22 17:45:47】至于「转换为子程序输入」的形式，这是留给后续运行时的
+                let narsese = FORMAT_ASCII
+                    // 尝试解析
+                    .parse(line)
+                    // 转换其中的错误类型
+                    .transform_err(to_parse_error)?;
+                // 尝试进行隐式转换，以统一使用`Task`类型
+                let task = implicit_into_task(narsese)?;
+                // 返回
+                Cmd::NSE(task)
+            }
             "NEW" => {
                 // 以空格分隔
                 let [target] = get_cmd_params::<1>(line)?;

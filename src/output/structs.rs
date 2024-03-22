@@ -21,21 +21,35 @@
 //!     #     * 🎯用于在后续实验中提取「推理器特异」的实用信息
 //! )
 //! ```
+//! 🔗[GitHub链接](https://github.com/ARCJ137442/BabelNAR.jl/blob/main/src/CIN/struct/NARSOutputType.jl)
+
+use narsese::lexical::Narsese as LexicalNarsese;
 
 /// NAVM输出类型
 /// * 🎯使用枚举，统一对「输出类别」分派
 /// * 📌除其中的[`String`]类型字段，通用于所有具体实现
 ///   * 📄与具体NAVM实现无关
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub enum Output {
     /// 表示「已输入信息」的recall
     /// * 📌该「信息」一般是Narsese字符串
+    ///   * 如各类CIN对Narsese输入的回显
+    /// * 📄样例 @ ONA: `Input: <A --> B>. Priority=1.000000 Truth: frequency=1.000000, confidence=0.900000\n`
     /// * ⚠️部分CIN可能不会输出
     IN { content: String },
 
     /// 表示「的一般输出信息」的recall
     /// * 🎯一般「推理导出结论」等不太重要的信息
-    OUT { content: String },
+    /// * 📄样例 @ ONA: `Derived: <A --> C>. Priority=0.407250 Truth: frequency=1.000000, confidence=0.810000\n`
+    ///
+    /// ! ⚠️【2024-03-22 18:28:12】现在将「是否需要在所有『CIN输出』中提取统一的Narsese」**交给各大运行时**
+    OUT {
+        /// 原始内容
+        content_raw: String,
+        /// （可能有的）Narsese内容（词法Narsese）
+        /// * ⚠️具体实现交给各大运行时
+        narsese: Option<LexicalNarsese>,
+    },
 
     /// 表示「内部错误」的信息
     /// * 🎯一般传递「内部发生了一个错误，可能需要处理」
@@ -46,16 +60,30 @@ pub enum Output {
     /// * 🎯一般各CIN对「问题」语句的「回答」
     /// * 🚩内部一般是相应的Narsese文本
     ///
-    /// TODO: 后续可能需要统一成CommonNarsese？目前尚未对此进行利用
-    ANSWER { narsese: String },
+    /// ! ⚠️【2024-03-22 18:28:12】现在将「是否需要在所有『CIN输出』中提取统一的Narsese」**交给各大运行时**
+    ANSWER {
+        /// 原始内容
+        content_raw: String,
+
+        /// （可能有的）Narsese内容（词法Narsese）
+        /// * ⚠️具体实现交给各大运行时
+        narsese: Option<LexicalNarsese>,
+    },
 
     /// 表示「输出一个『完成』」
     /// * 🎯一般各CIN对「目标」语句的「完成」
     /// * 🚩内部一般是相应的Narsese文本
-    /// * 📄最初见于PyNARS
+    /// * 📄最初见于PyNARS（🔗[原PR](https://github.com/bowen-xu/PyNARS/pull/30)）
     ///
-    /// TODO: 后续可能需要统一成CommonNarsese？目前尚未对此进行利用
-    ACHIEVED { narsese: String },
+    /// ! ⚠️【2024-03-22 18:28:12】现在将「是否需要在所有『CIN输出』中提取统一的Narsese」**交给各大运行时**
+    ACHIEVED {
+        /// 原始内容
+        content_raw: String,
+
+        /// （可能有的）Narsese内容（词法Narsese）
+        /// * ⚠️具体实现交给各大运行时
+        narsese: Option<LexicalNarsese>,
+    },
 
     /// 表示「输出一个操作」
     /// * 🎯一般表示各CIN「需要调用外部 代码/程序」的信号
@@ -64,10 +92,10 @@ pub enum Output {
     EXE {
         /// 「截取出的操作」的上下文
         /// * 📌一般是操作所出现的行
-        source: String,
+        content_raw: String,
 
         /// 截取出的操作信息
-        /// * 使用专有数据结构，以便规整化交互
+        /// * 🚩使用专有数据结构，以便规整化交互
         operation: Operation,
     },
 
@@ -80,17 +108,21 @@ pub enum Output {
     /// 表示「输出一条注释」
     /// * 🎯一般表示（比OUT、INFO）更无关紧要的输出
     /// * 📄最初见于PyNARS
-    ///
-    /// ? 💭似乎已经不知道是哪儿来的了
-    ///
     COMMENT { content: String },
 
     /// 表示「『预期』某个事件发生」
     /// * 🎯一般表示CIN（NAL 7~9）的高阶行为
     /// * 📄最初见于OpenNARS
     ///
-    /// TODO: 后续实际上需要进一步细化？比如提取其中的Narsese内容
-    ANTICIPATE { content: String },
+    /// ! ⚠️【2024-03-22 18:28:12】现在将「是否需要在所有『CIN输出』中提取统一的Narsese」**交给各大运行时**
+    ANTICIPATE {
+        /// 原始内容
+        content_raw: String,
+
+        /// （可能有的）Narsese内容（词法Narsese）
+        /// * ⚠️具体实现交给各大运行时
+        narsese: Option<LexicalNarsese>,
+    },
 
     /// 表示其它CIN输出
     /// * 🎯用于表示「可以识别到类型，但不在此枚举中」的NAVM输出
@@ -102,10 +134,9 @@ pub enum Output {
     /// * 🎯一般表示「暂无法格式化识别」的其它CIN输出
     ///   * 📌大多数时候无关紧要
     ///   * 🎯一般对应一行输出
-    /// * 📄如OpenNARS`Got relative path for loading the config: ./config/defaultConfig.xml`
-    /// * 📄如OpenNARS`executed based on`（操作执行的证据基础，用于验证「系统是否习得知识」）
-    ///
-    /// TODO: 后续实际上需要进一步细化？比如提取其中的Narsese内容
+    /// * 📄样例 @ OpenNARS: `Got relative path for loading the config: ./config/defaultConfig.xml`
+    /// * 📄样例 @ OpenNARS: `executed based on [...]`
+    ///   * 📝操作执行的证据基础，用于验证「系统是否习得知识」
     OTHER { content: String },
 }
 
@@ -191,7 +222,7 @@ macro_rules! operation {
 /// * 🚩【2024-03-21 12:44:23】此处模块必须使用不一样的名称
 ///   * 📌原因：`output`模块直接被`vm`重导出
 #[cfg(test)]
-pub mod tests_output {
+pub mod tests {
     use super::*;
     use Output::*;
 
@@ -202,19 +233,22 @@ pub mod tests_output {
                 content: "in".into(),
             },
             OUT {
-                content: "out".into(),
+                content_raw: "out".into(),
+                narsese: None,
             },
             ERROR {
                 description: "err".into(),
             },
             ANSWER {
-                narsese: "answer".into(),
+                narsese: None,
+                content_raw: "answer".into(),
             },
             ACHIEVED {
-                narsese: "achieved".into(),
+                content_raw: "achieved".into(),
+                narsese: None,
             },
             EXE {
-                source: "EXE: ^left({SELF})".into(),
+                content_raw: "EXE: ^left({SELF})".into(),
                 operation: operation!("left" => "{SELF}"),
             },
             INFO {
@@ -224,7 +258,8 @@ pub mod tests_output {
                 content: "comment".into(),
             },
             ANTICIPATE {
-                content: "anticipate".into(),
+                content_raw: "anticipate".into(),
+                narsese: None,
             },
             OTHER {
                 content: "other".into(),
