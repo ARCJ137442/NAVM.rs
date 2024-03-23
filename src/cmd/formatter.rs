@@ -3,7 +3,11 @@
 //!   * 📄指令[`Cmd::NSE`]只使用**CommonNarsese**语法
 //!
 use super::Cmd;
-use narsese::conversion::string::impl_lexical::format_instances::FORMAT_ASCII;
+use narsese::{
+    api::TryCastToSentence, conversion::string::impl_lexical::format_instances::FORMAT_ASCII,
+    lexical::Narsese,
+};
+use util::ResultBoostSingular;
 
 impl Cmd {
     /// 获取指令头
@@ -38,8 +42,16 @@ impl Cmd {
             | Cmd::NEW { target }
             | Cmd::DEL { target }
             | Cmd::INF { target } => target.clone(),
-            // 词法Narsese | 🚩【2024-03-23 00:15:21】目前是任务
-            Cmd::NSE(narsese) => FORMAT_ASCII.format_task(narsese),
+            // 词法Narsese
+            // * 🚩【2024-03-24 03:36:40】目前将尝试先「将『空预算任务』隐式转换为语句」然后再进行格式化
+            //   * 📌避免「空预算任务」`A.`变为`$$ A.`导致的「非法输入」情况
+            //   * 💭虽说后续大概率不会再以此作为直接输入
+            //   * 💫不可避免地要进行一次拷贝（相比「格式化器层面的向下转换」还是差了点性能）
+            Cmd::NSE(narsese) => FORMAT_ASCII.format_narsese(
+                &Narsese::Task(narsese.clone())
+                    .try_cast_to_sentence()
+                    .collapse(),
+            ),
             // 数值
             Cmd::CYC(n) | Cmd::VOL(n) => n.to_string(),
             // 名称

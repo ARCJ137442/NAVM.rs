@@ -120,6 +120,7 @@ impl super::Cmd {
                     // 转换其中的错误类型
                     .transform_err(to_parse_error)?;
                 // 尝试进行隐式转换，以统一使用`Task`类型
+                // * ⚠️其中的「语句」将会被转换为「空预算任务」
                 let task = implicit_into_task(narsese)?;
                 // 返回
                 Cmd::NSE(task)

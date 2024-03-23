@@ -14,7 +14,7 @@ version = "0.16.0"
 
 [[package]]
 name = "narsese"
-version = "0.7.2"
+version = "0.9.0"
 dependencies = [
  "lazy_static",
  "nar_dev_utils",
@@ -22,7 +22,7 @@ dependencies = [
 
 [[package]]
 name = "navm"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "nar_dev_utils",
  "narsese",
