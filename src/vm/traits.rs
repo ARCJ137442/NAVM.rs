@@ -1,74 +1,38 @@
 //! 引入「非公理虚拟机」的特征
 
-use crate::{cmd, output};
+use crate::{cmd::Cmd, output::Output};
 
 /// 虚拟机运行时
 /// * 🎯所有**已启动**的「非公理虚拟机」遵循的特征
 /// * 🚩【2024-03-21 21:48:22】目前方案：通过一个启动器进行启动
 ///
-/// TODO: 完善理论模型（「异步输入」等）
+/// ## 基本理论模型
+///
+/// 「非公理虚拟机」的运行时，简单而言只做两件事：
+/// * 输入：从某处接收「指令」[`crate::cmd::Cmd`]
+/// * 输出：产生一系列「输出」[`crate::output::Output`]
+///
+/// 在这两件事之间，虚拟机和外界是**并行**运作的
+/// * 📌输入、输出都是**异步**的
+///   * 输入虚拟机的指令，不会在函数层面有任何返回值
+///   * 从虚拟机发出的输出，不直接与「输入」相绑定
 pub trait VmRuntime {
-    // 指令相关 //
+    // 输入 //
 
     /// 【抽象】向虚拟机输入NAVM指令
     /// * 📌几乎是一切NAVM的核心函数
     /// * 📌是一个「异步方法」
     ///   * 输入之后不会有「回传」（即此处返回值）
     ///   * 回传需要在「输出侦听器」进行捕获
-    fn input_cmd(&mut self, cmd: cmd::Cmd);
+    fn input_cmd(&mut self, cmd: Cmd);
 
-    // 输出相关 //
-
-    /// 【抽象】向虚拟机存入一个输出
-    /// * 🎯用于「向实际的『输出缓存列表』中存储输出」
-    ///
-    /// TODO: ❓这两个「控制输出缓冲区」的目的是什么
-    fn store_output(&mut self, output: output::Output);
+    // 输出 //
 
     /// 【抽象】从虚拟机中获取一个输出
-    /// * 📌一般使用「输出缓冲区」实现
-    /// * 📌一般**从旧到新**输出
+    /// * 📌不会阻塞代码
+    /// * 📌**从旧到新**输出
     /// * 🚩可能没有：此时说明虚拟机没有输出
-    fn fetch_output(&mut self) -> Option<output::Output>;
-
-    /// 【抽象】向虚拟机添加一个「输出侦听器」
-    /// * 📌功能上：可添加多个，并且被链式调用
-    ///   * 🚩添加时基本是「先来后到」原则
-    ///   * 🚩所传入的函数一般被放进[`Box`]中
-    /// * 🚩链式调用机理：输出消耗链——通过[`Option`]控制「输出是否被处理（被消耗）」
-    ///   * 返回`Some(输出)`：输出未被消耗，侦听可以继续（实现「一个输出，多方处理」的效果）
-    ///   * 返回`None`：输出已被消耗，侦听链中断
-    fn add_output_listener<Listener>(&mut self, listener: Listener)
-    where
-        Listener: FnMut(output::Output) -> Option<output::Output>;
-
-    /// 【抽象】在虚拟机上遍历「输出侦听器」
-    /// * 🚩返回一个「输出所有『输出侦听器』的可变引用」的迭代器
-    /// * 🚩输出全部装箱，以便后续作为特征对象
-    /// * 📝此处需要统一返回类型的生命周期，避免「自身比返回的迭代器提早销毁」的悬垂引用
-    fn iter_output_listeners<'a>(
-        &'a self,
-    ) -> Box<dyn Iterator<Item = &'a mut dyn FnMut(output::Output) -> Option<output::Output>> + 'a>;
-
-    /// 事件：当（封装的）CIN存储一个输出时
-    /// * 🚩遍历所有「输出侦听器」，若均未被捕获，则【存入】输出（缓冲区）
-    fn on_output(&mut self, output: output::Output) {
-        // 装入容器
-        let mut output = Some(output);
-        // 在所有侦听器上传递
-        for listener in self.iter_output_listeners() {
-            match output {
-                // 若未消耗⇒继续传递
-                Some(inner) => output = listener(inner),
-                // 若被消耗⇒结束传递
-                None => break,
-            }
-        }
-        // 传递后还有⇒存入（缓冲区）
-        if let Some(inner) = output {
-            self.store_output(inner)
-        }
-    }
+    fn fetch_output(&mut self) -> Option<Output>;
 }
 
 /// 虚拟机启动器
