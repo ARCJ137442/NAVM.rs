@@ -161,6 +161,42 @@ impl Output {
             Output::OTHER { .. } => "OTHER",
         }
     }
+
+    /// 获取「NAVM输出」的原始内容
+    /// * 🚩【2024-03-24 18:27:50】提取其中的「主要内容」「原始内容」
+    ///   * 📌主要包含各CIN输出的行
+    pub fn raw_content(&self) -> String {
+        match self {
+            Output::IN { content }
+            | Output::OUT {
+                content_raw: content,
+                ..
+            }
+            | Output::COMMENT { content }
+            | Output::ANTICIPATE {
+                content_raw: content,
+                ..
+            }
+            | Output::UNCLASSIFIED { content, .. }
+            | Output::OTHER { content }
+            | Output::ERROR {
+                description: content,
+            }
+            | Output::ANSWER {
+                content_raw: content,
+                ..
+            }
+            | Output::ACHIEVED {
+                content_raw: content,
+                ..
+            }
+            | Output::EXE {
+                content_raw: content,
+                ..
+            }
+            | Output::INFO { message: content } => content.clone(),
+        }
+    }
 }
 
 /// 表征一个「NARS操作」
