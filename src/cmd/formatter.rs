@@ -4,10 +4,8 @@
 //!
 use super::Cmd;
 use narsese::{
-    api::TryCastToSentence, conversion::string::impl_lexical::format_instances::FORMAT_ASCII,
-    lexical::Narsese,
+    api::GetBudget, conversion::string::impl_lexical::format_instances::FORMAT_ASCII, lexical::Task,
 };
-use util::ResultBoostSingular;
 
 impl Cmd {
     /// 获取指令头
@@ -46,12 +44,10 @@ impl Cmd {
             // * 🚩【2024-03-24 03:36:40】目前将尝试先「将『空预算任务』隐式转换为语句」然后再进行格式化
             //   * 📌避免「空预算任务」`A.`变为`$$ A.`导致的「非法输入」情况
             //   * 💭虽说后续大概率不会再以此作为直接输入
-            //   * 💫不可避免地要进行一次拷贝（相比「格式化器层面的向下转换」还是差了点性能）
-            Cmd::NSE(narsese) => FORMAT_ASCII.format_narsese(
-                &Narsese::Task(narsese.clone())
-                    .try_cast_to_sentence()
-                    .collapse(),
-            ),
+            // * ⚡【2024-03-24 13:59:11】性能问题「隐式转换不可避免的拷贝」已初步解决
+            //   * ✅使用「空预算识别+内部字段`sentence`提取」实现「引用传参」而无需转换语句
+            //   * 📌目前暂不考虑将其内置进Narsese.rs
+            Cmd::NSE(narsese) => format_try_as_sentence(narsese),
             // 数值
             Cmd::CYC(n) | Cmd::VOL(n) => n.to_string(),
             // 名称
@@ -62,6 +58,16 @@ impl Cmd {
                 tail: args_line, ..
             } => args_line.clone(),
         }
+    }
+}
+
+fn format_try_as_sentence(task: &Task) -> String {
+    // 手动检查预算值是否为空
+    match task.get_budget().is_empty() {
+        // 空⇒拿出内部对语句的引用，只格式化语句部分
+        true => FORMAT_ASCII.format_sentence(task.get_sentence()),
+        // 非空⇒直接格式化自身（只需引用）
+        false => FORMAT_ASCII.format_task(task),
     }
 }
 
