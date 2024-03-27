@@ -1,13 +1,8 @@
 //! 定义「NAVM指令」的简易解析器
 //! * 从字符串简要解析出NAVM指令指令类型
-//!
-//! TODO: 有待重构「NSE」指令
 
 use super::Cmd;
-use narsese::{
-    conversion::string::impl_lexical::format_instances::FORMAT_ASCII,
-    lexical::{Narsese, Task as LexicalTask},
-};
+use narsese::conversion::string::impl_lexical::format_instances::FORMAT_ASCII;
 use std::{error::Error, fmt::Display};
 use util::*;
 
@@ -66,21 +61,14 @@ mod parse_error {
 }
 use parse_error::*;
 
-/// 将解析出的「词法Narsese」隐式转换为[`LexicalTask`]
-fn implicit_into_task(narsese: Narsese) -> ParseResult<LexicalTask> {
-    match narsese {
-        Narsese::Task(task) => Ok(task),
-        _ => Err(ParseError(format!(
-            "解析到非任务数据「{}」：{narsese:?}",
-            FORMAT_ASCII.format_narsese(&narsese)
-        ))),
-    }
-}
-
 /// 扩展指令[`Cmd`]类型的功能
 impl super::Cmd {
     /// 从字符串构造NAVM指令
     pub fn parse(line: &str) -> ParseResult<Self> {
+        // 空字串
+        if_return! {
+            line.trim().is_empty() => Err(ParseError::new("尝试解析空行！"))
+        }
         // 拆分字符串为两个部分
         let (head, params) = line
             .split_once(char::is_whitespace)
@@ -93,7 +81,7 @@ impl super::Cmd {
     /// * 🚩除了「指令头」以外，均为「指令行」
     ///   * ⚠️「指令行」不包括「指令头」
     pub fn parse_str_params(head: &str, line: &str) -> ParseResult<Self> {
-        Ok(match head {
+        Ok(match head.to_uppercase().as_str() {
             // 内置：各自有各自的处理方法
             "SAV" => {
                 // 以空格分隔
@@ -121,7 +109,9 @@ impl super::Cmd {
                     .transform_err(to_parse_error)?;
                 // 尝试进行隐式转换，以统一使用`Task`类型
                 // * ⚠️其中的「语句」将会被转换为「空预算任务」
-                let task = implicit_into_task(narsese)?;
+                let task = narsese
+                    .try_into_task_compatible()
+                    .transform_err(to_parse_error)?;
                 // 返回
                 Cmd::NSE(task)
             }

@@ -110,7 +110,7 @@ impl Output {
             Output::OUT { narsese, .. }
             | Output::ANSWER { narsese, .. }
             | Output::ACHIEVED { narsese, .. }
-            | Output::ANTICIPATE { narsese, .. } => {
+            | Output::UNCLASSIFIED { narsese, .. } => {
                 // * 🚩将内部可能有的Narsese值转换为ASCII CommonNarsese字符串
                 narsese
                     // 复制以使用

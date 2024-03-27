@@ -1,6 +1,9 @@
 //! 定义NAVM的输出类型
 //! * 🚩【2024-03-21 11:34:10】目前使用枚举实现
 //!
+//! ! 📌【2024-03-27 19:29:44】现在移除输出类型`ANTICIPATE`，降格为`UNCLASSIFIED`
+//! * 原因：仅在特定CIN中出现，并不普遍适用于各CIN（并且在OpenNARS其中也只是插件）
+//!
 //! # Reference
 //!
 //! 参考**BabelNAR**中的如下Julia代码：
@@ -23,7 +26,12 @@
 //! ```
 //! 🔗[GitHub链接](https://github.com/ARCJ137442/BabelNAR.jl/blob/main/src/CIN/struct/NARSOutputType.jl)
 
-use narsese::lexical::Narsese as LexicalNarsese;
+use anyhow::Result;
+use narsese::{
+    conversion::string::impl_lexical::format_instances::FORMAT_ASCII,
+    lexical::{Narsese as LexicalNarsese, Term as LexicalTerm},
+};
+use util::{AsStrRef, JoinTo};
 
 /// NAVM输出类型
 /// * 🎯使用枚举，统一对「输出类别」分派
@@ -36,6 +44,8 @@ pub enum Output {
     ///   * 如各类CIN对Narsese输入的回显
     /// * 📄样例 @ ONA: `Input: <A --> B>. Priority=1.000000 Truth: frequency=1.000000, confidence=0.900000\n`
     /// * ⚠️部分CIN可能不会输出
+    ///
+    /// ? 【2024-03-27 19:36:32】后续或支持Narsese
     IN { content: String },
 
     /// 表示「的一般输出信息」的recall
@@ -110,25 +120,25 @@ pub enum Output {
     /// * 📄最初见于PyNARS
     COMMENT { content: String },
 
-    /// 表示「『预期』某个事件发生」
-    /// * 🎯一般表示CIN（NAL 7~9）的高阶行为
-    /// * 📄最初见于OpenNARS
-    ///
-    /// ! ⚠️【2024-03-22 18:28:12】现在将「是否需要在所有『CIN输出』中提取统一的Narsese」**交给各大运行时**
-    ANTICIPATE {
-        /// 原始内容
-        content_raw: String,
-
-        /// （可能有的）Narsese内容（词法Narsese）
-        /// * ⚠️具体实现交给各大运行时
-        narsese: Option<LexicalNarsese>,
+    /// 表示「CIN终止运行」
+    /// * 🎯用于表征并处理「CIN终止」的情况
+    ///   * 📌往往是NAVM运行时发出的最后一条消息
+    /// * 📄ONA中「Narsese解析失败」「Narsese输入不合法」等，都会导致CIN停止运行
+    ///   * 如：`Parsing error: Punctuation has to be belief . goal ! or question ?\n` `Test failed.`
+    TERMINATED {
+        /// 「终止」的描述
+        description: String,
     },
 
     /// 表示其它CIN输出
     /// * 🎯用于表示「可以识别到类型，但不在此枚举中」的NAVM输出
-    ///   * 📌针对一些特定CIN的方言使用
+    ///   * 📌针对一些特定CIN的「方言」使用
     ///   * 📌针对后续「使用模式匹配识别出的类型」使用
-    UNCLASSIFIED { r#type: String, content: String },
+    UNCLASSIFIED {
+        r#type: String,
+        content: String,
+        narsese: Option<LexicalNarsese>,
+    },
 
     /// 表示其它CIN输出
     /// * 🎯一般表示「暂无法格式化识别」的其它CIN输出
@@ -141,7 +151,7 @@ pub enum Output {
 }
 
 impl Output {
-    /// 判断「NAVM输出」的类型
+    /// 获取「NAVM输出」的类型
     /// * 📌【2024-03-21 11:36:49】使用[`str`]静态返回
     /// * 🚩直接`match`并返回**全大写**英文
     #[inline]
@@ -155,7 +165,7 @@ impl Output {
             Output::EXE { .. } => "EXE",
             Output::INFO { .. } => "INFO",
             Output::COMMENT { .. } => "COMMENT",
-            Output::ANTICIPATE { .. } => "ANTICIPATE",
+            Output::TERMINATED { .. } => "TERMINATED",
             // ! 特别的「未分类」情形：使用其中预置的「类名」
             Output::UNCLASSIFIED { r#type, .. } => r#type.as_str(),
             Output::OTHER { .. } => "OTHER",
@@ -173,10 +183,6 @@ impl Output {
                 ..
             }
             | Output::COMMENT { content }
-            | Output::ANTICIPATE {
-                content_raw: content,
-                ..
-            }
             | Output::UNCLASSIFIED { content, .. }
             | Output::OTHER { content }
             | Output::ERROR {
@@ -194,8 +200,17 @@ impl Output {
                 content_raw: content,
                 ..
             }
-            | Output::INFO { message: content } => content.clone(),
+            | Output::INFO { message: content }
+            | Output::TERMINATED {
+                description: content,
+            } => content.clone(),
         }
+    }
+
+    /// 判断其「类型/头部」是否为指定的字串
+    /// * ⚠️参数需要使用全大写的字符串，如"ANSWER"
+    pub fn is_type(&self, type_name: &str) -> bool {
+        self.type_name() == type_name
     }
 }
 
@@ -203,30 +218,60 @@ impl Output {
 /// * 直接对应各CIN中形如「操作(参数1, 参数2, ...)」
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Operation {
-    // 操作头名
+    // 操作符名
     // * 📄如：`left` `right` `deactivate`
     //
     // ! ⚠️不带尖号
-    pub head: String,
+    pub operator_name: String,
 
-    // 操作的参数
-    pub params: Vec<String>,
+    /// 操作的参数（词项数组）
+    pub params: Vec<LexicalTerm>,
 }
 
 impl Operation {
     /// 构造函数
-    pub fn new(operator_name: &str, params: impl Iterator<Item = String>) -> Self {
+    /// * ℹ️若需从[`String`]与[`Vec`]直接构造，请直接使用结构体字面量语法
+    ///   * 📄参见[`Operation`]
+    pub fn new(operator_name: &str, params: impl Iterator<Item = LexicalTerm>) -> Self {
         Self {
-            head: operator_name.into(),
+            operator_name: operator_name.into(),
             params: params.collect(),
         }
+    }
+    /// 构造函数
+    /// * ℹ️若需从[`String`]与[`Vec`]直接构造，请直接使用结构体字面量语法
+    ///   * 📄参见[`Operation`]
+    pub fn try_from_strings(
+        operator_name: &str,
+        params_str: impl Iterator<Item = impl AsStrRef>,
+    ) -> Result<Self> {
+        // 先解析参数
+        let mut params = vec![];
+        for param in params_str {
+            let parsed = FORMAT_ASCII.parse(param.as_str_ref())?.try_into_term()?;
+            params.push(parsed);
+        }
+        // 构造自身并返回
+        Ok(Self {
+            operator_name: operator_name.into(),
+            params,
+        })
     }
 
     /// 转换为JSON字符串
     /// * 🚩使用不带空白符的「最密版本」
     pub fn to_json_string(&self) -> String {
-        format!("[{},{}]", &self.head, self.params.join(","))
+        format!(
+            "[{:?},{:?}]",
+            &self.operator_name,
+            self.params
+                .iter()
+                .map(|t| FORMAT_ASCII.format_term(t))
+                .join_to_new(",")
+        )
     }
+
+    // ? 【2024-03-27 20:49:33】是否要增加JSON解析功能？
 }
 
 /// 转换为纯字符串数组
@@ -234,13 +279,20 @@ impl From<Operation> for Vec<String> {
     fn from(value: Operation) -> Self {
         // 首先提取其元素
         let Operation {
-            head,
+            operator_name,
             // 将「参数」换成可变的「返回值」
-            params: mut result,
+            params,
         } = value;
-        // 然后将头添加进返回值中
-        result.insert(0, head);
-        // 返回「参数」
+
+        // 创建返回值，自动包含头
+        let mut result = vec![operator_name];
+
+        // 然后逐个添加内部词项的字符串形式
+        for param in params {
+            result.push(FORMAT_ASCII.format_term(&param));
+        }
+
+        // 返回
         result
     }
 }
@@ -249,7 +301,12 @@ impl From<Operation> for Vec<String> {
 #[macro_export]
 macro_rules! operation {
     ($operator_name:expr => $($param:expr)*) => {
-        Operation{ head: $operator_name.into(), params: vec![$($param.into()),*] }
+        Operation{
+            operator_name: $operator_name.into(),
+            params: vec![$(
+                FORMAT_ASCII.parse($param.as_str_ref()).unwrap().try_into_term().unwrap()
+            ),*]
+        }
     };
 }
 
@@ -260,6 +317,7 @@ macro_rules! operation {
 #[cfg(test)]
 pub mod tests {
     use super::*;
+    use narsese::lexical_nse;
     use Output::*;
 
     /// 产生测试样本集
@@ -270,18 +328,18 @@ pub mod tests {
             },
             OUT {
                 content_raw: "out".into(),
-                narsese: None,
+                narsese: Some(lexical_nse!(<A --> C>.)),
             },
             ERROR {
                 description: "err".into(),
             },
             ANSWER {
-                narsese: None,
+                narsese: Some(lexical_nse!(<A --> B>.)),
                 content_raw: "answer".into(),
             },
             ACHIEVED {
                 content_raw: "achieved".into(),
-                narsese: None,
+                narsese: Some(lexical_nse!(G.)),
             },
             EXE {
                 content_raw: "EXE: ^left({SELF})".into(),
@@ -293,9 +351,13 @@ pub mod tests {
             COMMENT {
                 content: "comment".into(),
             },
-            ANTICIPATE {
-                content_raw: "anticipate".into(),
-                narsese: None,
+            TERMINATED {
+                description: "terminated".into(),
+            },
+            UNCLASSIFIED {
+                r#type: "unclassified".into(),
+                content: "unclassified".into(),
+                narsese: Some(lexical_nse!(<A --> B>.)),
             },
             OTHER {
                 content: "other".into(),
