@@ -106,20 +106,10 @@ impl Output {
             _ => None,
         };
         // 专有：Narsese（词法Narsese）
-        let narsese = match self {
-            Output::OUT { narsese, .. }
-            | Output::ANSWER { narsese, .. }
-            | Output::ACHIEVED { narsese, .. }
-            | Output::UNCLASSIFIED { narsese, .. } => {
-                // * 🚩将内部可能有的Narsese值转换为ASCII CommonNarsese字符串
-                narsese
-                    // 复制以使用
-                    .clone()
-                    .map(|narsese| FORMAT_ASCII.format_narsese(&narsese))
-            }
-            // ! 使用通配符可能意味着后续「在别的类型中添加了Narsese字段，但不会被处理」的情况
-            _ => None,
-        };
+        let narsese = self
+            .get_narsese()
+            // * 🚩将内部可能有的Narsese值转换为ASCII CommonNarsese字符串
+            .map(|narsese| FORMAT_ASCII.format_narsese(narsese));
         // 输出
         OutputJSON {
             content,

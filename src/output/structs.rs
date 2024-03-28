@@ -212,6 +212,25 @@ impl Output {
     pub fn is_type(&self, type_name: &str) -> bool {
         self.type_name() == type_name
     }
+
+    /// 获取Narsese（词法Narsese）
+    /// * 🎯封装`match`逻辑，提取输出中可能的Narsese
+    /// * 📌可能有，也可能没有
+    /// * 🚩【2024-03-28 15:01:57】目前不区分「类型本身就没有」与「类型支持，但未存储」
+    pub fn get_narsese(&self) -> Option<&LexicalNarsese> {
+        match self {
+            Output::OUT { narsese, .. }
+            | Output::ANSWER { narsese, .. }
+            | Output::ACHIEVED { narsese, .. }
+            | Output::UNCLASSIFIED { narsese, .. } => match narsese {
+                // * 🚩这里需要再匹配一次，以从`&Option<T>`变成`Option<&T>`
+                Some(narsese) => Some(narsese),
+                None => None,
+            },
+            // ! 使用通配符可能意味着后续「在别的类型中添加了Narsese字段，但不会被处理」的情况
+            _ => None,
+        }
+    }
 }
 
 /// 表征一个「NARS操作」
