@@ -44,9 +44,12 @@ pub enum Output {
     ///   * 如各类CIN对Narsese输入的回显
     /// * 📄样例 @ ONA: `Input: <A --> B>. Priority=1.000000 Truth: frequency=1.000000, confidence=0.900000\n`
     /// * ⚠️部分CIN可能不会输出
-    ///
-    /// ? 【2024-03-27 19:36:32】后续或支持Narsese
-    IN { content: String },
+    /// * 🚩【2024-03-29 22:41:33】需要支持`narsese`属性，以便在测试时支持「回显检测」
+    ///   * 📄如各类CIN对Narsese输入的回显
+    IN {
+        content: String,
+        narsese: Option<LexicalNarsese>,
+    },
 
     /// 表示「的一般输出信息」的recall
     /// * 🎯一般「推理导出结论」等不太重要的信息
@@ -177,7 +180,7 @@ impl Output {
     ///   * 📌主要包含各CIN输出的行
     pub fn raw_content(&self) -> String {
         match self {
-            Output::IN { content }
+            Output::IN { content, .. }
             | Output::OUT {
                 content_raw: content,
                 ..
@@ -219,7 +222,8 @@ impl Output {
     /// * 🚩【2024-03-28 15:01:57】目前不区分「类型本身就没有」与「类型支持，但未存储」
     pub fn get_narsese(&self) -> Option<&LexicalNarsese> {
         match self {
-            Output::OUT { narsese, .. }
+            Output::IN { narsese, .. }
+            | Output::OUT { narsese, .. }
             | Output::ANSWER { narsese, .. }
             | Output::ACHIEVED { narsese, .. }
             | Output::UNCLASSIFIED { narsese, .. } => match narsese {
@@ -344,6 +348,7 @@ pub mod tests {
         vec![
             IN {
                 content: "in".into(),
+                narsese: Some(lexical_nse!("<in --> out>")),
             },
             OUT {
                 content_raw: "out".into(),
