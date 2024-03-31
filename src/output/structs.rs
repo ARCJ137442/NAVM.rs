@@ -178,7 +178,7 @@ impl Output {
     /// 获取「NAVM输出」的原始内容
     /// * 🚩【2024-03-24 18:27:50】提取其中的「主要内容」「原始内容」
     ///   * 📌主要包含各CIN输出的行
-    pub fn raw_content(&self) -> String {
+    pub fn raw_content(&self) -> &str {
         match self {
             Output::IN { content, .. }
             | Output::OUT {
@@ -206,7 +206,7 @@ impl Output {
             | Output::INFO { message: content }
             | Output::TERMINATED {
                 description: content,
-            } => content.clone(),
+            } => content,
         }
     }
 
@@ -226,11 +226,8 @@ impl Output {
             | Output::OUT { narsese, .. }
             | Output::ANSWER { narsese, .. }
             | Output::ACHIEVED { narsese, .. }
-            | Output::UNCLASSIFIED { narsese, .. } => match narsese {
-                // * 🚩这里需要再匹配一次，以从`&Option<T>`变成`Option<&T>`
-                Some(narsese) => Some(narsese),
-                None => None,
-            },
+            // * 📝从`&Option<T>`变成`Option<&T>`的方法，直接使用[`Option::as_ref`]
+            | Output::UNCLASSIFIED { narsese, .. } => narsese.as_ref(),
             // ! 使用通配符可能意味着后续「在别的类型中添加了Narsese字段，但不会被处理」的情况
             _ => None,
         }

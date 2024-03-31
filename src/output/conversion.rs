@@ -98,7 +98,7 @@ impl Output {
         // 共有：输出类型
         let r#type = self.type_name().to_owned();
         // 共有：内容 | 原始内容
-        let content = self.raw_content();
+        let content = self.raw_content().into();
         // 专有：操作
         let operation: Option<Vec<String>> = match self {
             // * 🚩只有`EXE`才会附带操作信息
