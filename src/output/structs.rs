@@ -31,6 +31,7 @@ use narsese::{
     conversion::string::impl_lexical::format_instances::FORMAT_ASCII,
     lexical::{Narsese as LexicalNarsese, Term as LexicalTerm},
 };
+use std::fmt::Display;
 use util::{AsStrRef, JoinTo};
 
 /// NAVM输出类型
@@ -124,7 +125,7 @@ pub enum Output {
     COMMENT { content: String },
 
     /// 表示「CIN终止运行」
-    /// * 🎯用于表征并处理「CIN终止」的情况
+    /// * 🎯用于表征并告知「CIN终止」的情况
     ///   * 📌往往是NAVM运行时发出的最后一条消息
     /// * 📄ONA中「Narsese解析失败」「Narsese输入不合法」等，都会导致CIN停止运行
     ///   * 如：`Parsing error: Punctuation has to be belief . goal ! or question ?\n` `Test failed.`
@@ -305,9 +306,38 @@ impl Operation {
         )
     }
 
+    /// 判断是否没参数
+    /// * 🎯在「预期匹配」中作为「通配符」使用
+    /// * 📄「无参操作」如`^left`仅在ONA中出现过
+    /// * 🚩直接调用[`Vec::is_empty`]，少用一个逻辑取反
+    #[inline]
+    pub fn no_params(&self) -> bool {
+        self.params.is_empty()
+    }
+
+    /// 判断是否有参数
+    /// * 📄相对[`Self::no_params`]而言
+    /// * 🚩多一个逻辑取反
+    #[inline]
+    pub fn has_params(&self) -> bool {
+        !self.no_params()
+    }
+
     // ? 【2024-03-27 20:49:33】是否要增加JSON解析功能？
 }
 
+/// 呈现
+/// * 🎯格式化成一个CommonNarsese词项（陈述）
+impl Display for Operation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // 操作符
+        write!(f, "<(*")?;
+        for param in self.params.iter() {
+            write!(f, ", {}", FORMAT_ASCII.format_term(param))?;
+        }
+        write!(f, ") --> ^{}>", self.operator_name)
+    }
+}
 /// 转换为纯字符串数组
 impl From<Operation> for Vec<String> {
     fn from(value: Operation) -> Self {

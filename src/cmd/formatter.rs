@@ -2,10 +2,12 @@
 //! * 📌统一格式，不以具体CIN为转移
 //!   * 📄指令[`Cmd::NSE`]只使用**CommonNarsese**语法
 //!
+
 use super::Cmd;
 use narsese::{
     api::GetBudget, conversion::string::impl_lexical::format_instances::FORMAT_ASCII, lexical::Task,
 };
+use std::fmt::Display;
 
 impl Cmd {
     /// 获取指令头
@@ -86,9 +88,9 @@ impl From<&Cmd> for String {
     }
 }
 
-impl ToString for Cmd {
-    fn to_string(&self) -> String {
-        self.into()
+impl Display for Cmd {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&String::from(self))
     }
 }
 
@@ -103,7 +105,7 @@ mod tests {
         let samples = super::super::structs::tests::samples();
         // 逐个格式化并打印
         for cmd in samples {
-            println!("{}", cmd.to_string());
+            println!("{cmd}");
         }
     }
 }

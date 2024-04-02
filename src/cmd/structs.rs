@@ -6,7 +6,7 @@
 use narsese::lexical::Task as LexicalTask;
 
 /// NAVM指令 数据结构
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Cmd {
     /// `Save` | 在path保存target
     /// 指令：保存当前数据（记忆）到文件
