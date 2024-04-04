@@ -67,9 +67,9 @@ fn format_try_as_sentence(task: &Task) -> String {
     // 手动检查预算值是否为空
     match task.get_budget().is_empty() {
         // 空⇒拿出内部对语句的引用，只格式化语句部分
-        true => FORMAT_ASCII.format_sentence(task.get_sentence()),
+        true => FORMAT_ASCII.format(task.get_sentence()),
         // 非空⇒直接格式化自身（只需引用）
-        false => FORMAT_ASCII.format_task(task),
+        false => FORMAT_ASCII.format(task),
     }
 }
 

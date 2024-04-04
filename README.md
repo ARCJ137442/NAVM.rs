@@ -1,6 +1,6 @@
 # NAVM - Non-Axiomatic Virtual Machine | 非公理虚拟机
 
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-2.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
 该项目使用[语义化版本 2.0.0](https://semver.org/)进行版本号管理。
 

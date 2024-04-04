@@ -62,7 +62,7 @@ impl ToString for OutputJSON {
             // 仅在内部有值时进行处理
             Some(v) => format!(
                 // ! 这是JSON的一部分
-                ",operation:[{}]",
+                ",\"operation\":[{}]",
                 v.iter()
                     // 统一转义
                     .map(|s| format!("{s:?}"))
@@ -76,13 +76,13 @@ impl ToString for OutputJSON {
         // 特有参数：内部Narsese（实现为ASCII CommonNarsese）
         let narsese_suffix = match &self.narsese {
             // 存在⇒以Debug形式添加（自动转义）
-            Some(narsese_str) => format!(",narsese:{narsese_str:?}"),
+            Some(narsese_str) => format!(",\"narsese\":{narsese_str:?}"),
             // 没有⇒空字串
             None => "".to_string(),
         };
         // 最终拼接
         format!(
-            "{}type:{type_:?},content:{content:?}{}{}{}",
+            "{}\"type\":{type_:?},\"content\":{content:?}{}{}{}",
             "{",
             // 尝试转换，有⇒添加，无⇒置空
             operation_suffix,
@@ -109,7 +109,7 @@ impl Output {
         let narsese = self
             .get_narsese()
             // * 🚩将内部可能有的Narsese值转换为ASCII CommonNarsese字符串
-            .map(|narsese| FORMAT_ASCII.format_narsese(narsese));
+            .map(|narsese| FORMAT_ASCII.format(narsese));
         // 输出
         OutputJSON {
             content,

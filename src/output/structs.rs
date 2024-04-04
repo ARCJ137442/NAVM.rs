@@ -301,7 +301,7 @@ impl Operation {
             &self.operator_name,
             self.params
                 .iter()
-                .map(|t| FORMAT_ASCII.format_term(t))
+                .map(|t| FORMAT_ASCII.format(t))
                 .join_to_new(",")
         )
     }
@@ -333,7 +333,7 @@ impl Display for Operation {
         // 操作符
         write!(f, "<(*")?;
         for param in self.params.iter() {
-            write!(f, ", {}", FORMAT_ASCII.format_term(param))?;
+            write!(f, ", {}", FORMAT_ASCII.format(param))?;
         }
         write!(f, ") --> ^{}>", self.operator_name)
     }
@@ -353,7 +353,7 @@ impl From<Operation> for Vec<String> {
 
         // 然后逐个添加内部词项的字符串形式
         for param in params {
-            result.push(FORMAT_ASCII.format_term(&param));
+            result.push(FORMAT_ASCII.format(&param));
         }
 
         // 返回
