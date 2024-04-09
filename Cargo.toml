@@ -1,6 +1,6 @@
 [package]
 name = "navm"
-version = "0.9.1"
+version = "0.10.0"
 edition = "2021"
 description = """
 Definitions and APIs for the NAVM (Non-Axiomatic Virtual Machine) model
@@ -17,7 +17,22 @@ repository = "https://github.com/ARCJ137442/NAVM.rs"
 
 # Cargo文档参考：<https://rustwiki.org/zh-CN/cargo/reference/manifest.html>
 
+[features]
+default = ["serde"]
+serde = ["dep:serde", "dep:serde_json"]
+
+
 [dependencies]
+
+# 用于NAVM输出的序列化/反序列化
+[dependencies.serde]
+version = "1.0.197"
+features = ["derive"]
+optional = true
+
+[dependencies.serde_json]
+version = "1.0.115"
+optional = true
 
 [dependencies.anyhow]
 version = "1.0.81"

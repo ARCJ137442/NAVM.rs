@@ -154,25 +154,50 @@ pub enum Output {
     OTHER { content: String },
 }
 
+/// 有关「输出类型名称」的常量池
+pub mod type_names {
+    /// 输出类型名称 @ IN
+    pub const IN: &str = "IN";
+    /// 输出类型名称 @ OUT
+    pub const OUT: &str = "OUT";
+    /// 输出类型名称 @ ERROR
+    pub const ERROR: &str = "ERROR";
+    /// 输出类型名称 @ ANSWER
+    pub const ANSWER: &str = "ANSWER";
+    /// 输出类型名称 @ ACHIEVED
+    pub const ACHIEVED: &str = "ACHIEVED";
+    /// 输出类型名称 @ EXE
+    pub const EXE: &str = "EXE";
+    /// 输出类型名称 @ INFO
+    pub const INFO: &str = "INFO";
+    /// 输出类型名称 @ COMMENT
+    pub const COMMENT: &str = "COMMENT";
+    /// 输出类型名称 @ TERMINATED
+    pub const TERMINATED: &str = "TERMINATED";
+    /// 输出类型名称 @ OTHER
+    pub const OTHER: &str = "OTHER";
+}
+
 impl Output {
     /// 获取「NAVM输出」的类型
     /// * 📌【2024-03-21 11:36:49】使用[`str`]静态返回
     /// * 🚩直接`match`并返回**全大写**英文
     #[inline]
     pub fn type_name(&self) -> &str {
+        use type_names::*;
         match self {
-            Output::IN { .. } => "IN",
-            Output::OUT { .. } => "OUT",
-            Output::ERROR { .. } => "ERROR",
-            Output::ANSWER { .. } => "ANSWER",
-            Output::ACHIEVED { .. } => "ACHIEVED",
-            Output::EXE { .. } => "EXE",
-            Output::INFO { .. } => "INFO",
-            Output::COMMENT { .. } => "COMMENT",
-            Output::TERMINATED { .. } => "TERMINATED",
+            Output::IN { .. } => IN,
+            Output::OUT { .. } => OUT,
+            Output::ERROR { .. } => ERROR,
+            Output::ANSWER { .. } => ANSWER,
+            Output::ACHIEVED { .. } => ACHIEVED,
+            Output::EXE { .. } => EXE,
+            Output::INFO { .. } => INFO,
+            Output::COMMENT { .. } => COMMENT,
+            Output::TERMINATED { .. } => TERMINATED,
             // ! 特别的「未分类」情形：使用其中预置的「类名」
             Output::UNCLASSIFIED { r#type, .. } => r#type.as_str(),
-            Output::OTHER { .. } => "OTHER",
+            Output::OTHER { .. } => OTHER,
         }
     }
 
@@ -295,6 +320,7 @@ impl Operation {
     /// 转换为JSON字符串
     /// * 🚩转换为JSON字符串数组
     /// * 🚩使用不带空白符的「最密版本」
+    /// * 🚩【2024-04-09 11:05:01】目前暂不使用[`serde_json`]
     pub fn to_json_string(&self) -> String {
         format!(
             "[{:?},{:?}]",
@@ -322,8 +348,6 @@ impl Operation {
     pub fn has_params(&self) -> bool {
         !self.no_params()
     }
-
-    // ? 【2024-03-27 20:49:33】是否要增加JSON解析功能？
 }
 
 /// 呈现
@@ -338,6 +362,7 @@ impl Display for Operation {
         write!(f, ") --> ^{}>", self.operator_name)
     }
 }
+
 /// 转换为纯字符串数组
 impl From<Operation> for Vec<String> {
     fn from(value: Operation) -> Self {
@@ -420,7 +445,7 @@ pub mod tests {
                 description: "terminated".into(),
             },
             UNCLASSIFIED {
-                r#type: "unclassified".into(),
+                r#type: "unclassified".to_uppercase(),
                 content: "unclassified".into(),
                 narsese: Some(lexical_nse!(<A --> B>.)),
             },
