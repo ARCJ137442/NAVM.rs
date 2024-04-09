@@ -1,6 +1,6 @@
 //! 简单演绎推理机
 //! * 🎯展示NAVM的实现
-//! * 🎯展示NAL-1的演绎推理
+//! * 🎯展示IL-1的演绎推理
 
 mod graph;
 use graph::*;
@@ -78,7 +78,7 @@ impl VmRuntimeDed {
         (narsese_str, narsese)
     }
 
-    /// 【NAL-1】新增一个词项「演绎链接」
+    /// 【IL-1】新增一个词项「演绎链接」
     /// * 🚩先添加链接，再传递性更新
     ///   * 更新时生成「OUT」输出
     pub fn add_ded_link(&mut self, from: &Term, to: &Term) {
@@ -93,30 +93,37 @@ impl VmRuntimeDed {
 
     /// 传递性更新
     /// * 🚩更新时产生[`Output::OUT`]输出
+    /// * 🎯展示IL-1「演绎」的规则
     /// TODO: 性能有待优化
     fn transitive_update(&mut self, _from: &Term, _to: &Term) {
-        let to_add = list! [
-            {
-                // * 🚩复制，以免借用冲突 | 边遍历边修改
-                (item_from.clone(), item_to.clone())
+        loop {
+            let to_add = list! [
+                {
+                    // * 🚩复制，以免借用冲突 | 边遍历边修改
+                    (item_from.clone(), item_to.clone())
+                }
+                for item_mid in (self.ded_graph.items())
+                for item_from in (self.ded_graph.items_to(item_mid).unwrap())
+                for item_to in (self.ded_graph.items_from(item_mid).unwrap())
+                // 限制必须是新结论
+                if (!self.ded_graph.has_link(item_from, item_to))
+            ];
+            // * 🚩没啥可增加⇒退出（应对「长距离推理」的场景）
+            if to_add.is_empty() {
+                break;
             }
-            for item_mid in (self.ded_graph.items())
-            for item_from in (self.ded_graph.items_to(item_mid).unwrap())
-            for item_to in (self.ded_graph.items_from(item_mid).unwrap())
-            // 限制必须是新结论
-            if (!self.ded_graph.has_link(item_from, item_to))
-        ];
-        for (i_from, i_to) in to_add {
-            // 添加连接
-            self.ded_graph.add_link_cloned(&i_from, &i_to);
-            // 添加输出
-            let term = Term::new_inheritance(i_from, i_to);
-            let judgement = Judgement(term, Truth::Empty, Stamp::Eternal);
-            let (narsese_str, narsese) = Self::enum_to_lexical(&judgement);
-            self.add_output(Output::OUT {
-                content_raw: narsese_str,
-                narsese: Some(narsese),
-            })
+            for (i_from, i_to) in to_add {
+                // 添加连接
+                self.ded_graph.add_link_cloned(&i_from, &i_to);
+                // 添加输出
+                let term = Term::new_inheritance(i_from, i_to);
+                let judgement = Judgement(term, Truth::Empty, Stamp::Eternal);
+                let (narsese_str, narsese) = Self::enum_to_lexical(&judgement);
+                self.add_output(Output::OUT {
+                    content_raw: narsese_str,
+                    narsese: Some(narsese),
+                })
+            }
         }
     }
 
