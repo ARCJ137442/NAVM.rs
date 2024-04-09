@@ -1,6 +1,6 @@
 [package]
 name = "navm"
-version = "0.10.0"
+version = "0.11.0"
 edition = "2021"
 description = """
 Definitions and APIs for the NAVM (Non-Axiomatic Virtual Machine) model
@@ -18,9 +18,15 @@ repository = "https://github.com/ARCJ137442/NAVM.rs"
 # Cargo文档参考：<https://rustwiki.org/zh-CN/cargo/reference/manifest.html>
 
 [features]
-default = ["serde"]
-serde = ["dep:serde", "dep:serde_json"]
+# 默认全部启用
+default = ["bundled"]
 
+# 包括serde与serde_json
+bundled = ["serde", "serde_json"]
+# 通用 序列化/反序列化
+serde = ["dep:serde"]
+# 有关JSON的直接支持
+serde_json = ["dep:serde_json"]
 
 [dependencies]
 

@@ -8,7 +8,7 @@
 //! 📄JSON格式参考如下TypeScript定义：
 //! ```typescript
 //! export type NARSOutput = {
-//!     /** 输出的类别 */
+//!     /** 输出的类别（全大写） */
 //!     type: string
 //!     /** 输出的（原始）内容，可能会截去类别信息 */
 //!     content: string
@@ -63,7 +63,9 @@ pub struct OutputJSON {
 
 /// 将「JSON化的NAVM输出」转换为字符串
 /// * ✅【2024-04-09 10:31:23】现在接入[`serde_json`]以实现序列化
+///   * ✨可选择性禁用
 ///   * ⚠️理论上不会失败（字符串/字符串数组）
+#[cfg(feature = "serde_json")]
 impl ToString for OutputJSON {
     fn to_string(&self) -> String {
         // *
@@ -106,6 +108,7 @@ impl Output {
 
     /// 将NAVM输出转换为JSON字符串
     /// * 🚩先转换为JSON结构，再将其转换为字符串
+    #[cfg(feature = "serde_json")]
     pub fn to_json_string(&self) -> String {
         self.to_json_struct().to_string()
     }
@@ -113,6 +116,7 @@ impl Output {
     /// 将NAVM输出数组转换为JSON数组
     /// * 📌[`serde`]并未对Vec<Self>`自动实现[`Serialize`]特征
     /// * 🚩此处采用手动序列化的方式
+    #[cfg(feature = "serde_json")]
     pub fn vec_to_json_string(v: &[Self]) -> String {
         // 先转换为JSON结构
         let vec = list![
@@ -199,6 +203,7 @@ impl Output {
 
     /// 尝试从 JSON 字符串中解析出输出
     /// * 🚩先解析出中间JSON结构体，再将其折叠为输出类型
+    #[cfg(feature = "serde_json")]
     pub fn try_from_json_string(s: &str) -> Result<Self> {
         pipe! {
             s
@@ -209,24 +214,45 @@ impl Output {
     }
 
     /// 将JSON字符串转换为「输出类型数组」
-    /// * 🚩先利用派生的`Vec<OutputJSON>`实现，转换为「中间JSON结构体」
-    ///   * 🚩再将其逐一转换为「输出数组」
+    /// * 🚩现在直接使用[`serde_json::from_str`]方法
+    ///   * ✅【2024-04-09 13:26:42】已通过[`serde`]对[`Output`]进行默认的序列化、反序列化实现
     /// * 🔗参考[`serde`]对[`Vec`]的默认反序列化实现：<https://docs.rs/serde/latest/serde/trait.Deserialize.html#impl-Deserialize%3C'de%3E-for-Vec%3CT%3E>
-    ///   * ⚠️并不对[`Output`]直接实现[`Deserialize`]
+    #[cfg(feature = "serde_json")]
     pub fn vec_try_from_json_string(s: &str) -> Result<Vec<Self>> {
-        // 先转换为JSON结构数组
-        let v: Vec<OutputJSON> = serde_json::from_str(s)?;
-        // 再逐一折叠
-        Ok(list![
-            (Self::try_from_json_struct(json)?)
-            for json in (v)
-        ])
+        Ok(serde_json::from_str(s)?)
     }
 }
 
-// TODO: impl Serialize for Output
-// TODO: impl Deserialize for Output
+/// 对输出直接实现序列化
+impl Serialize for Output {
+    fn serialize<S>(&self, serializer: S) -> std::prelude::v1::Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        // 先转换为JSON对象
+        let json_s = self.to_json_struct();
+        // 再以JSON对象进行序列化
+        json_s.serialize(serializer)
+    }
+}
 
+/// 对输出直接实现反序列化
+impl<'de> Deserialize<'de> for Output {
+    fn deserialize<D>(deserializer: D) -> std::prelude::v1::Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        use serde::de::Error;
+        // 先反序列化成JSON对象
+        let json_s = OutputJSON::deserialize(deserializer)?;
+        // 再从JSON对象解析，并转换其中的错误类型
+        // * 📝归并到「通用错误转换函数」使用[`D::Error::custom`]
+        // * 🔗参考：<https://serde.rs/impl-deserializer.html>
+        Self::try_from_json_struct(json_s).map_err(D::Error::custom)
+    }
+}
+
+#[cfg(feature = "serde_json")]
 impl TryFrom<&str> for OutputJSON {
     type Error = anyhow::Error;
 
@@ -243,6 +269,7 @@ impl TryFrom<OutputJSON> for Output {
     }
 }
 
+#[cfg(feature = "serde_json")]
 impl OutputJSON {
     pub fn try_from_json_string(s: &str) -> Result<Self> {
         Ok(serde_json::from_str(s)?)
@@ -260,9 +287,25 @@ impl From<Output> for OutputJSON {
 mod tests {
     use crate::output::{tests::test_samples, Output};
 
+    /// 测试/与JSON结构互转
+    /// * 🎯能与JSON结构无损互转
+    #[test]
+    fn test_json_struct() {
+        let samples = test_samples();
+        // 各个样本的测试
+        for output in &samples {
+            let json = output.to_json_struct();
+            println!("{json:?}");
+            let re_converted = super::Output::try_from_json_struct(json).expect("JSON结构解析失败");
+            // println!("<= {re_converted:?}");
+            assert_eq!(*output, re_converted);
+        }
+    }
+
     /// 测试/与JSON字串互转
     /// * 🎯能与JSON字符串无损互转
     #[test]
+    #[cfg(feature = "serde_json")]
     fn test_json_str() {
         let samples = test_samples();
         // 各个样本的测试
