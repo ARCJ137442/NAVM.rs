@@ -314,6 +314,8 @@ impl VmRuntime for VmRuntimeDed {
             INF { .. } => self.add_output(Output::INFO {
                 message: format!("运行时信息：{self:?}"),
             }),
+            // 注释 ⇒ 忽略
+            REM { .. } => (),
             // 其它
             _ => self.add_output(Output::ERROR {
                 description: format!("❌尚未支持的NAVM指令类型：{cmd}"),

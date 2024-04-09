@@ -114,17 +114,16 @@ impl Output {
     }
 
     /// 将NAVM输出数组转换为JSON数组
-    /// * 📌[`serde`]并未对Vec<Self>`自动实现[`Serialize`]特征
-    /// * 🚩此处采用手动序列化的方式
     #[cfg(feature = "serde_json")]
     pub fn vec_to_json_string(v: &[Self]) -> String {
-        // 先转换为JSON结构
-        let vec = list![
-            (output.to_json_struct())
-            for output in (v)
-        ];
-        // 再对结构数组进行序列化
-        serde_json::to_string(&vec).expect("不会转换失败：内部JSON结构总是转换成功")
+        serde_json::to_string(v).expect("不会转换失败：内部JSON结构总是转换成功")
+    }
+
+    /// 将NAVM输出引用数组转换为JSON数组
+    /// * ⚠️与[`vec_to_json_string`]的核心区别就在`&[&Self]`与`&[Self]`
+    #[cfg(feature = "serde_json")]
+    pub fn vec_ref_to_json_string(v: &[&Self]) -> String {
+        serde_json::to_string(&v).expect("不会转换失败：内部JSON结构总是转换成功")
     }
 
     // * 反序列化 * //
@@ -307,6 +306,8 @@ mod tests {
     #[test]
     #[cfg(feature = "serde_json")]
     fn test_json_str() {
+        use util::asserts;
+
         let samples = test_samples();
         // 各个样本的测试
         for output in &samples {
@@ -318,9 +319,16 @@ mod tests {
             assert_eq!(*output, re_converted);
         }
         // 样本集总体的测试
+        let sample_refs = samples.iter().collect::<Vec<_>>();
         let json_str = Output::vec_to_json_string(&samples);
+        let json_str_ref = Output::vec_ref_to_json_string(&sample_refs);
         println!("{json_str}");
         let re_converted = Output::vec_try_from_json_string(&json_str).expect("JSON转换失败");
-        assert_eq!(samples, re_converted);
+        let re_converted_ref = Output::vec_try_from_json_string(&json_str).expect("JSON转换失败");
+        asserts! {
+            samples => re_converted,
+            samples => re_converted_ref,
+            re_converted => re_converted_ref,
+        }
     }
 }
