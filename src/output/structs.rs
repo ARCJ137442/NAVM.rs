@@ -6,7 +6,7 @@
 //!
 //! # Reference
 //!
-//! 参考**BabelNAR**中的如下Julia代码：
+//! **BabelNAR**中的如下Julia代码（旧）：
 //! ```julia
 //! NARSOutputType = (;
 //!     IN = "IN",
@@ -48,11 +48,14 @@ pub enum Output {
     /// * 🚩【2024-03-29 22:41:33】需要支持`narsese`属性，以便在测试时支持「回显检测」
     ///   * 📄如各类CIN对Narsese输入的回显
     IN {
+        /// 原始内容
         content: String,
+        /// （可能有的）Narsese内容（词法Narsese）
+        /// * ⚠️因CIN而异
         narsese: Option<LexicalNarsese>,
     },
 
-    /// 表示「的一般输出信息」的recall
+    /// 表示「导出信息」的recall
     /// * 🎯一般「推理导出结论」等不太重要的信息
     /// * 📄样例 @ ONA: `Derived: <A --> C>. Priority=0.407250 Truth: frequency=1.000000, confidence=0.810000\n`
     ///
@@ -61,13 +64,13 @@ pub enum Output {
         /// 原始内容
         content_raw: String,
         /// （可能有的）Narsese内容（词法Narsese）
-        /// * ⚠️具体实现交给各大运行时
+        /// * ⚠️因CIN而异
         narsese: Option<LexicalNarsese>,
     },
 
     /// 表示「内部错误」的信息
     /// * 🎯一般传递「内部发生了一个错误，可能需要处理」
-    /// * 📄例如OpenNARS中的`[ERR]: NullPointer Exception...`
+    /// * 📄样例 @ OpenNARS: `[ERR]: NullPointer Exception...`
     ERROR { description: String },
 
     /// 表示「输出一个『回答』」
@@ -80,7 +83,7 @@ pub enum Output {
         content_raw: String,
 
         /// （可能有的）Narsese内容（词法Narsese）
-        /// * ⚠️具体实现交给各大运行时
+        /// * ⚠️因CIN而异
         narsese: Option<LexicalNarsese>,
     },
 
@@ -88,6 +91,7 @@ pub enum Output {
     /// * 🎯一般各CIN对「目标」语句的「完成」
     /// * 🚩内部一般是相应的Narsese文本
     /// * 📄最初见于PyNARS（🔗[原PR](https://github.com/bowen-xu/PyNARS/pull/30)）
+    /// * 📄样例 @ PyNARS: `ACHIEVED: A. :|: %1.000:0.900%`
     ///
     /// ! ⚠️【2024-03-22 18:28:12】现在将「是否需要在所有『CIN输出』中提取统一的Narsese」**交给各大运行时**
     ACHIEVED {
@@ -95,14 +99,15 @@ pub enum Output {
         content_raw: String,
 
         /// （可能有的）Narsese内容（词法Narsese）
-        /// * ⚠️具体实现交给各大运行时
+        /// * ⚠️因CIN而异
         narsese: Option<LexicalNarsese>,
     },
 
     /// 表示「输出一个操作」
     /// * 🎯一般表示各CIN「需要调用外部 代码/程序」的信号
     /// * 🚩内部封装专有数据结构
-    ///   * 📌之所以不内联，是因为改数据结构后续还要进行使用
+    ///   * 📌不内联的原因：数据结构[`Operation`]后续常常要**独立使用**
+    /// * 📄样例 @ OpenNARS: `EXE: $0.45;0.90;0.95$ ^left([{SELF}, (*,P1,P2)])=null`
     EXE {
         /// 「截取出的操作」的上下文
         /// * 📌一般是操作所出现的行
@@ -115,8 +120,7 @@ pub enum Output {
 
     /// 表示「输出一条信息」
     /// * 🎯一般是CIN输出的各种（无关紧要的）提示信息
-    ///  * 📄如：（OpenNARS）`[l]: attaching Shell to Nar...`
-    ///  * 📄如：（PyNARS）``
+    ///  * 📄样例 @ PyNARS: `INFO  : Loading RuleMap <LUT.pkl>...`
     INFO { message: String },
 
     /// 表示「输出一条注释」

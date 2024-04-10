@@ -1,3 +1,7 @@
+//! 示例用「原生IL-1」虚拟机实现
+//! * 🎯展示：如何基于NAVM构建符合IO格式的最小CIN
+//! * ⚠️需要用到[`narsese`]库中的「[枚举Narsese](`narsese::enum_narsese`)」特性
+
 use navm::{
     cmd::Cmd,
     vm::{VmLauncher, VmRuntime},

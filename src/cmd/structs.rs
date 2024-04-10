@@ -17,7 +17,7 @@ pub enum Cmd {
     LOA { target: String, path: String },
 
     /// `Reset` | 重置target
-    /// 指令：清除CIN数据
+    /// 指令：重置CIN数据
     /// * 如：记忆区、缓冲区……
     RES { target: String },
 
@@ -51,7 +51,7 @@ pub enum Cmd {
 
     /// `Info`
     /// 指令：让CIN输出某类信息
-    INF { target: String },
+    INF { source: String },
 
     /// `Help` | 帮助
     /// 指令：打印（CIN的）帮助文档
@@ -63,7 +63,7 @@ pub enum Cmd {
     REM { comment: String },
 
     /// `Custom`
-    /// 自定义指令
+    /// 指令：自定义
     ///
     /// * 🎯后续一切「VM特定指令」的后门类型
     /// * 🚩【2024-03-04 23:26:29】目前不使用「特征对象」的形式
@@ -120,7 +120,7 @@ pub(crate) mod tests {
                 name: "name".into(),
             },
             Cmd::INF {
-                target: "target".into(),
+                source: "target".into(),
             },
             Cmd::HLP {
                 name: "name".into(),

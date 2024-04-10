@@ -39,7 +39,7 @@ use util::{list, manipulate, pipe};
 #[serde(rename_all = "camelCase")]
 #[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct OutputJSON {
-    /// 输出的类型
+    /// 输出的类别
     /// * 📝使用`r#`前缀以避开关键字
     ///   * 实际使用时还是以`type`作为字段
     pub r#type: String,

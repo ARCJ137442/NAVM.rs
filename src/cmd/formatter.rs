@@ -38,10 +38,9 @@ impl Cmd {
             // 目标+路径
             Cmd::SAV { target, path } | Cmd::LOA { target, path } => format!("{} {}", target, path),
             // 目标
-            Cmd::RES { target }
-            | Cmd::NEW { target }
-            | Cmd::DEL { target }
-            | Cmd::INF { target } => target.clone(),
+            Cmd::RES { target } | Cmd::NEW { target } | Cmd::DEL { target } => target.clone(),
+            // 来源
+            Cmd::INF { source } => source.clone(),
             // 词法Narsese
             // * 🚩【2024-03-24 03:36:40】目前将尝试先「将『空预算任务』隐式转换为语句」然后再进行格式化
             //   * 📌避免「空预算任务」`A.`变为`$$ A.`导致的「非法输入」情况
@@ -99,6 +98,7 @@ impl Display for Cmd {
 mod tests {
 
     /// 测试/格式化
+    /// * 🎯格式化所有指令而不出错
     #[test]
     fn test_format() {
         // 取样本集

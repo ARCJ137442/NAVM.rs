@@ -151,7 +151,7 @@ impl super::Cmd {
             "INF" => {
                 // 以空格分隔
                 let [target] = get_cmd_params::<1>(line)?;
-                Cmd::INF { target }
+                Cmd::INF { source: target }
             }
             "HLP" => {
                 // 以空格分隔
@@ -173,14 +173,45 @@ impl super::Cmd {
 /// 单元测试
 #[cfg(test)]
 mod test {
-    use util::show;
-
     use super::*;
 
     #[test]
     fn test_split_ascii_whitespace() {
         let s = get_cmd_params::<3>("a b \tc").unwrap();
         // 能解析出来就是成功
-        assert_eq!(show!(s), ["a", "b", "c"]);
+        assert_eq!(dbg!(s), ["a", "b", "c"]);
+    }
+
+    /// 测试/解析单个指令
+    /// * 🎯保证「正常指令解析不出错」
+    fn _test_parse(cmd_str: &str) -> Cmd {
+        let cmd = Cmd::parse(cmd_str).expect("NAVM指令解析失败");
+        dbg!(cmd)
+    }
+
+    /// 测试/解析
+    #[test]
+    fn test_parse() {
+        let cmd_lines = "
+        SAV target path
+        LOA target path
+        RES target
+        NSE <(&&, <A --> $B>, <#C --> +1>) --> ^D>. :|: %1.0; 0.9%
+        NEW reasoner
+        DEL reasoner
+        CYC 137
+        VOL 0
+        REG operator_name
+        INF memory
+        HLP self
+        REM this is a comment or remark
+        CUSTOM_HEAD tail
+        "
+        .trim();
+
+        // 逐行解析
+        for line in cmd_lines.lines().map(str::trim) {
+            _test_parse(line);
+        }
     }
 }
