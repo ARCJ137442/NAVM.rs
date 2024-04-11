@@ -1,5 +1,7 @@
 # CommonNarsese
 
+[🔙概念](./doc.md)
+
 📍最后更新：【2024-04-10 15:39:37】
 
 基于[Narsese.rs](https://github.com/ARCJ137442/Narsese.rs?tab=readme-ov-file#%E6%A0%87%E5%87%86ascii%E8%AF%8D%E6%B3%95)的**标准ASCII词法**定义

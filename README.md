@@ -1,5 +1,8 @@
 # NAVM - Non-Axiomatic Virtual Machine | 非公理虚拟机
 
+    🏗️项目的**英文文档**尚在筹建，有意者欢迎提交PR
+    The **English document** of the project is still under preparation. PR is welcome.
+
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-2.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
 该项目使用[语义化版本 2.0.0](https://semver.org/)进行版本号管理。
@@ -15,7 +18,7 @@
 
 NAVM对各版本NARS系统的抽象
 
-更多有关NAVM概念的介绍，详见[《概念》](./docs/zh-cn/concepts/doc.md)
+更多有关NAVM概念的介绍，详见[📝《概念》](./docs/zh-cn/concepts/doc.md)
 
 <!-- ## 安装 -->
 

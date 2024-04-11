@@ -1,5 +1,7 @@
 # CIN
 
+[🔙概念](./doc.md)
+
 📍最后更新：【2024-04-10 15:38:34】
 
 📄全名：Computer Implement of NARS（NARS计算机实现）
