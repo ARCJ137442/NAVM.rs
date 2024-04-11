@@ -180,6 +180,11 @@ pub mod type_names {
     pub const TERMINATED: &str = "TERMINATED";
     /// 输出类型名称 @ OTHER
     pub const OTHER: &str = "OTHER";
+
+    /// 输出类型名称 @ ANTICIPATE
+    /// * 🚩【2024-04-11 22:58:00】仅出现在OpenNARS、ONA中的「半正式类型」
+    /// * 📝【2024-04-11 22:58:45】禁用の考量：所涉及NAL层级（NAL-9）过高、不稳定，且输出往往无用
+    pub const ANTICIPATE: &str = "ANTICIPATE";
 }
 
 impl Output {

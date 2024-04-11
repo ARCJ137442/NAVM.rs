@@ -14,6 +14,7 @@ use anyhow::Result;
 ///   * ❗亦可能在虚拟机报错退出时转为[`Self::Terminated`]状态（此时附带[`Err`]）
 ///
 /// ! ⚠️不要在此使用泛型：虚拟机整体需要能被作为特征对象使用
+#[derive(Debug)]
 pub enum VmStatus {
     /// 正在运行
     /// * ✅允许接收指令
