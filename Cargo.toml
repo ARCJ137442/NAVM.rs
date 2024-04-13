@@ -26,7 +26,8 @@ bundled = ["serde", "serde_json"]
 # 通用 序列化/反序列化
 serde = ["dep:serde"]
 # 有关JSON的直接支持
-serde_json = ["dep:serde_json"]
+# * 🚩【2024-04-13 15:20:23】现在需要以`serde`作为前置特性
+serde_json = ["serde", "dep:serde_json"]
 
 [dependencies]
 

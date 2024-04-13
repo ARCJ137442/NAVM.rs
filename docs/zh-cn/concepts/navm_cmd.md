@@ -2,6 +2,8 @@
 
 [🔙概念](./doc.md)
 
+[📃源码](./../../../src/cmd/mod.rs)
+
 - 🎯用以表示CIN常用的输入方式
   - 📄如「输入Narsese」「推理器步进」等
 - 🎯便于架设一个「前后端」解析执行架构
@@ -34,7 +36,7 @@ NAVM指令具有多种不同类型，其设计遵循以下原则：
 
 基于以上[原则](#分类的整体原则)，NAVM指令分类如下：
 
-（用「✏️」表示字段名，「📄」表示CIN输入样例）
+（用「✏️」表示字段名，「📄」表示CIN输入用例）
 
 #### **`SAV`**
 
@@ -95,23 +97,23 @@ NAVM指令具有多种不同类型，其设计遵循以下原则：
 `Cycle` | 控制推理器步进
 
 - ✏️正整数 | CIN步进的推理循环步长
-- 📄用例 @ OpenNARS: `5`
-- 📄用例 @ OpenJunars: `:c 5`
+- 📄OpenNARS: `5`
+- 📄OpenJunars: `:c 5`
 
 #### **`VOL`**
 
 `Volume` | 控制CIN输出音量，用以屏蔽
 
 - ✏️正整数 | 输出音量，通常为0~100，0=静音（仅回答、操作等），100=最大音量（允许所有次要结论展示）
-- 📄用例 @ OpenNARS: `*volume=0`
-- 📄用例 @ ONA: `*volume=0`
+- 📄OpenNARS: `*volume=0`
+- 📄ONA: `*volume=0`
 
 #### **`REG`**
 
 `Register` | 向CIN注册操作符（NAL-8），用以定制CIN的操作机制
 
-- 📄用例 @ ONA: `*setopname 1 ^left`
-- 📄用例 @ PyNARS: `/register left`
+- 📄ONA: `*setopname 1 ^left`
+- 📄PyNARS: `/register left`
 
 - ✏️名称：字符串 | 要被注册的操作符名称
 
@@ -136,7 +138,7 @@ NAVM指令具有多种不同类型，其设计遵循以下原则：
 `Remark` | 注释，一般不会被CIN执行；即便执行了也不会对推理过程产生影响
 
 - ✏️注释：字符串 | 注释中所含内容
-- 📄用例 @ OpenNARS: `'the detective claims that tim lives in graz`
+- 📄OpenNARS: `'the detective claims that tim lives in graz`
 
 #### **`Custom`**
 
