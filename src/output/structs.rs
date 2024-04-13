@@ -192,6 +192,8 @@ impl Output {
     /// * 📌【2024-03-21 11:36:49】使用[`str`]静态返回
     /// * 🚩直接`match`并返回**全大写**英文
     #[inline]
+    #[doc(alias = "type")]
+    #[doc(alias = "get_type")]
     pub fn type_name(&self) -> &str {
         use type_names::*;
         match self {
@@ -208,6 +210,14 @@ impl Output {
             Output::UNCLASSIFIED { r#type, .. } => r#type.as_str(),
             Output::OTHER { .. } => OTHER,
         }
+    }
+
+    /// 获取「NAVM输出」的类型
+    /// * 🔗[`Self::type_name`]的别名
+    /// * 🎯便于调用者以`get`统一检索
+    #[inline(always)]
+    pub fn get_type(&self) -> &str {
+        self.type_name()
     }
 
     /// 获取「NAVM输出」的原始内容
@@ -245,6 +255,14 @@ impl Output {
         }
     }
 
+    /// 获取「NAVM输出」的类型
+    /// * 🔗[`Self::raw_content`]的别名
+    /// * 🎯便于调用者以`get`统一检索
+    #[inline(always)]
+    pub fn get_content(&self) -> &str {
+        self.raw_content()
+    }
+
     /// 判断其「类型/头部」是否为指定的字串
     /// * ⚠️参数需要使用全大写的字符串，如"ANSWER"
     pub fn is_type(&self, type_name: &str) -> bool {
@@ -271,7 +289,8 @@ impl Output {
     /// 获取Narsese操作（专有的[`Operation`]）
     /// * 🎯封装`match`逻辑，提取输出中可能的Narsese操作
     /// * 🎯与后续「输出预期」中的「Narsese操作」对齐：允许`.nal`语法中统一解析操作
-    /// * 🚩【2024-03-31 17:07:23】目前只有输出类型[`Output::EXE`]会有
+    /// * 📌可能有，也可能没有
+    ///   * 🚩【2024-03-31 17:07:23】目前只有输出类型[`Output::EXE`]会有
     pub fn get_operation(&self) -> Option<&Operation> {
         match self {
             Output::EXE { operation, .. } => Some(operation),
