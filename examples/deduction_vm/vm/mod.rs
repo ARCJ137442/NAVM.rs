@@ -29,7 +29,9 @@ use std::collections::VecDeque;
 /// 虚拟机启动器
 pub struct VmDed;
 
-impl VmLauncher<VmRuntimeDed> for VmDed {
+impl VmLauncher for VmDed {
+    type Runtime = VmRuntimeDed;
+
     fn launch(self) -> Result<VmRuntimeDed> {
         Ok(VmRuntimeDed::new())
     }
