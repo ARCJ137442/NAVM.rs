@@ -1,45 +1,48 @@
 # NAVM - Non-Axiomatic Virtual Machine | 非公理虚拟机
 
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
+    🏗️项目的**英文文档**尚在筹建，有意者欢迎提交PR
+    The **English document** of the project is still under preparation. PR is welcome.
+
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-2.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
 该项目使用[语义化版本 2.0.0](https://semver.org/)进行版本号管理。
 
-一个指令机架构库
+一个对NARS进行**统一输入输出建模**的**指令机架构库**
 
-- 基于[NAVM.jl](https://github.com/ARCJ137442/NAVM.jl)
-- 对NARS（非公理推理系统）进行**统一指令机抽象**
+- 承继于[NAVM.jl](https://github.com/ARCJ137442/NAVM.jl)
+- 对NARS（非公理推理系统）进行统一抽象
 
-## 概念
+（注：该库只是一个**抽象模型**与API，对于其在具体实现中的应用，请参考[BabelNAR.rs](https://github.com/ARCJ137442/BabelNAR.rs)）
 
-### CIN (Computer Implement of NARS)
+## 概念简介
 
-- 「NARS计算机实现」之英文缩写
-- 指代所有**实现NARS**的计算机软件系统
-  - 不要求完整实现NAL 1~9
+NAVM对各版本NARS系统的抽象
 
-### ***CommonNarsese***
+更多有关NAVM概念的介绍，详见[📝《概念》](./docs/zh-cn/concepts/doc.md)
 
-🔗参考[**JuNarsese.jl**的相关部分](https://github.com/ARCJ137442/JuNarsese.jl?tab=readme-ov-file#commonnarsese)
+<!-- ## 安装 -->
 
-### 中间语 NAIR
-
-NAVM使用一个统一的「中间语言」对CIN的输入进行抽象
-
-- 🎯用以表示CIN常用的输入方式
-  - 📄如「输入Narsese」「推理器步进」等
-- 🎯便于架设一个「前后端」解析执行架构
-  - 📌可**统一各CIN实现的输入形式**
-    - 前端：处理各类输入（例如终端、脚本）数据，将其翻译成中间语(NAIR)
-    - 后端：处理中间语对象，将其翻译成对应CIN命令
-
-## 安装
-
-TODO: 待库成熟时完善内容
+<!-- * 📌【2024-04-10 10:19:40】有关具体环节，在crates.io中已经完善 -->
 
 ## 使用
 
-TODO: 待库成熟时完善内容
+### 输入输出
+
+NAVM.rs提供两个重要的**输入输出**数据类型：
+
+- [NAVM**指令**](./docs/zh-cn/concepts/navm_cmd.md)：用于统一表示对CIN的**输入**
+- [NAVM**输出**](./docs/zh-cn/concepts/navm_output.md)：用于统一表示CIN的**输出**
+
+任何能输入输出与NARS有关的程序，通过「`Cmd`→程序专用输入」与「程序专用输出`→Output`」，即可被抽象为NAVM。
+
+这两种数据类型都提供至少一种统一的数据转换方式：
+
+- NAVM指令：具有**简单易读的类汇编语法**，可与字符串 `String` 相互转换
+  - 详见[NAVM指令/语法](./docs/zh-cn/concepts/navm_cmd.md/#语法)
+- NAVM输出：可被转换为**JSON对象**，并且亦可从JSON对象中解析
+  - 详见[NAVM输出/JSON格式](./docs/zh-cn/concepts/navm_output.md/#JSON格式)
 
 ## 参见
 
 - Julia前身：[NAVM.jl](https://github.com/ARCJ137442/NAVM.jl)
+- Narsese支持：[Narsese.rs](https://github.com/ARCJ137442/Narsese.rs)

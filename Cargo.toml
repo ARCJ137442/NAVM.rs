@@ -1,8 +1,63 @@
 [package]
 name = "navm"
-version = "0.1.0"
+version = "0.14.1"
 edition = "2021"
+description = """
+Definitions and APIs for the NAVM (Non-Axiomatic Virtual Machine) model
+"""
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+readme = "README.md"
+keywords = ["NARS", "Non-Axiomatic-Reasoning", "NAVM"]
+
+license = "MIT OR Apache-2.0"
+categories = [
+    "parser-implementations", # 解析器实现 | NAVM指令、NAVM输出
+] # 🔗<https://crates.io/category_slugs>
+repository = "https://github.com/ARCJ137442/NAVM.rs"
+
+# Cargo文档参考：<https://rustwiki.org/zh-CN/cargo/reference/manifest.html>
+
+[features]
+# 默认全部启用
+default = ["bundled"]
+
+# 包括serde与serde_json
+bundled = ["serde", "serde_json"]
+# 通用 序列化/反序列化
+serde = ["dep:serde"]
+# 有关JSON的直接支持
+# * 🚩【2024-04-13 15:20:23】现在需要以`serde`作为前置特性
+serde_json = ["serde", "dep:serde_json"]
 
 [dependencies]
+
+# 用于NAVM输出的序列化/反序列化
+[dependencies.serde]
+version = "1.0.197"
+features = ["derive"]
+optional = true
+
+[dependencies.serde_json]
+version = "1.0.115"
+optional = true
+
+[dependencies.anyhow]
+version = "1.0.81"
+
+[dependencies.nar_dev_utils]
+# 【2024-03-13 21:17:55】实用库现在独立为`nar_dev_utils`
+# * 【2024-03-13 22:36:05】目前只启用它的宏
+version = "0" # * ✅现已发布至`crates.io`
+# path = "../NAR-dev-util"
+# git = "https://github.com/ARCJ137442/NAR-dev-util"
+# ! 【2024-03-23 19:19:01】似乎Rust-Analyzer无法获取私有仓库数据
+features = []
+
+[dependencies.narsese]
+# ! 本地依赖可以不添加版本
+# 载入Narsese API，引入其中的「词法Narsese」部分
+# path = "../Narsese.rs"
+version = "0" # * ✅现已发布至`crates.io`
+# git = "https://github.com/ARCJ137442/Narsese.rs"
+# ! 【2024-03-23 19:19:01】似乎Rust-Analyzer无法获取私有仓库数据
+features = ["lexical_narsese"]

@@ -2,6 +2,7 @@
     "recommendations": [
         "nyxiative.rust-and-friends",
         "swellaby.vscode-rust-test-adapter",
-        "rust-lang.rust-analyzer"
+        "rust-lang.rust-analyzer",
+        "itsyaasir.rust-feature-toggler"
     ]
 }
