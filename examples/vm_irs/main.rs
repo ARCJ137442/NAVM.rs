@@ -1,5 +1,9 @@
-//! 示例用「原生IL-1」虚拟机实现
+//! 示例用「继承推理机」虚拟机实现
+//! * 📄全程：Inheritance Reasoning System
+//! * 📄理论来源：《NAL》中的「继承逻辑-1」**IL-1**
 //! * 🎯展示：如何基于NAVM构建符合IO格式的最小CIN
+//! * 🎯展示：NAVM的「原生」字符串IO
+//!   * 🔗对应BabelNAR.rs的「原生」转译器
 //! * ⚠️需要用到[`narsese`]库中的「[枚举Narsese](`narsese::enum_narsese`)」特性
 
 use navm::{
@@ -9,12 +13,19 @@ use navm::{
 use std::io::stdin;
 
 nar_dev_utils::mods! {
+    // 虚拟机部分
     use pub vm;
 }
 
-/// REPL
+/// 入口
 fn main() {
-    let mut vm = VmDed.launch().unwrap();
+    // 启动虚拟机
+    let vm = VmDed.launch().unwrap();
+    // 开始REPL
+    repl(vm)
+}
+
+fn repl(mut vm: impl VmRuntime) {
     let mut buf = String::new();
     loop {
         // 读取缓冲区内容
@@ -25,7 +36,7 @@ fn main() {
         if line.is_empty() {
             continue;
         }
-        repl(&mut vm, line);
+        repl_line(&mut vm, line);
 
         // 清空缓冲区
         buf.clear();
@@ -33,7 +44,7 @@ fn main() {
 }
 
 /// REPL执行一行
-fn repl(vm: &mut VmRuntimeDed, line: &str) {
+fn repl_line(vm: &mut impl VmRuntime, line: &str) {
     // 解析&输入
     match Cmd::parse(line) {
         Ok(cmd) => {

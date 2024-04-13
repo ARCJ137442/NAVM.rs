@@ -2,5 +2,8 @@
     "editor.formatOnSave": true,
     "cSpell.words": [
         "setopname"
+    ],
+    "rust-analyzer.linkedProjects": [
+        ".\\Cargo.toml"
     ]
 }
