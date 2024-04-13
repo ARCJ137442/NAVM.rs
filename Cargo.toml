@@ -7,7 +7,7 @@ Definitions and APIs for the NAVM (Non-Axiomatic Virtual Machine) model
 """
 
 readme = "README.md"
-keywords = ["NARS", "Non-Axiomatic-Reasoning", "NAVM"]
+keywords = ["NARS", "Non-Axiomatic-Logic", "NAVM"]
 
 license = "MIT OR Apache-2.0"
 categories = [
