@@ -26,6 +26,7 @@ impl Cmd {
             Cmd::INF { .. } => "INF",
             Cmd::HLP { .. } => "HLP",
             Cmd::REM { .. } => "REM",
+            Cmd::EXI { .. } => "EXI",
             Cmd::Custom { head, .. } => head,
         }
     }
@@ -55,6 +56,9 @@ impl Cmd {
             Cmd::REG { name } | Cmd::HLP { name } => name.clone(),
             // 注释
             Cmd::REM { comment } => comment.clone(),
+            // 原因
+            Cmd::EXI { reason } => reason.clone(),
+            // 其它
             Cmd::Custom {
                 tail: args_line, ..
             } => args_line.clone(),

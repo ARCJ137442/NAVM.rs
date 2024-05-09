@@ -161,6 +161,9 @@ impl super::Cmd {
             "REM" => Cmd::REM {
                 comment: line.into(),
             },
+            "EXI" => Cmd::EXI {
+                reason: line.into(),
+            },
             // 自定义：存入「自定义」类型中
             other => Self::Custom {
                 head: other.into(),

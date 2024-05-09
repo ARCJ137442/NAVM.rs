@@ -3,6 +3,7 @@
         "nyxiative.rust-and-friends",
         "swellaby.vscode-rust-test-adapter",
         "rust-lang.rust-analyzer",
-        "itsyaasir.rust-feature-toggler"
+        "itsyaasir.rust-feature-toggler",
+        "statiolake.vscode-rustfmt"
     ]
 }

@@ -1,6 +1,6 @@
 [package]
 name = "navm"
-version = "0.14.1"
+version = "0.15.0"
 edition = "2021"
 description = """
 Definitions and APIs for the NAVM (Non-Axiomatic Virtual Machine) model

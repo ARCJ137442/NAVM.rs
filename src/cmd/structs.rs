@@ -62,6 +62,11 @@ pub enum Cmd {
     /// * 📌仅存储内容，后续通常翻译为空字串
     REM { comment: String },
 
+    /// `Exit`
+    /// 指令：让当前CIN停止运行并退出
+    /// * 🎯【2024-05-09 14:06:15】普遍需要用于自动化测试
+    EXI { reason: String },
+
     /// `Custom`
     /// 指令：自定义
     ///
@@ -127,6 +132,9 @@ pub(crate) mod tests {
             },
             Cmd::REM {
                 comment: "comment".into(),
+            },
+            Cmd::EXI {
+                reason: "reason".into(),
             },
             Cmd::Custom {
                 head: "HEAD".into(),
