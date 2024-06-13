@@ -28,9 +28,9 @@ checksum = "de2fad06f5a0f39772634d0f72d7d114bc31f33b089012692330e914e5f02bea"
 
 [[package]]
 name = "narsese"
-version = "0.19.1"
+version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8530d24772e0382c84683812e7a7c1c58a417dfec31cacc16358635316a76e1"
+checksum = "1ba3d45a2ccaebd48afcd567ed838b6e06865c84a7b2b1cae50a5603a6f12e89"
 dependencies = [
  "lazy_static",
  "nar_dev_utils",
@@ -38,7 +38,7 @@ dependencies = [
 
 [[package]]
 name = "navm"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "anyhow",
  "nar_dev_utils",
