@@ -423,7 +423,7 @@ macro_rules! operation {
             => $($param:expr)*
         )?
     ) => {
-        $crate::output::structs::Operation {
+        $crate::output::Operation {
             operator_name: $operator_name.into(),
             // * 🚩参数列表
             params: vec![
