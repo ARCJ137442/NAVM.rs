@@ -420,7 +420,7 @@ macro_rules! operation {
     (
         $operator_name:expr
         $(
-            => $($param:expr)*
+            => $($param:expr $(,)?)*
         )?
     ) => {
         $crate::output::Operation {
@@ -440,6 +440,17 @@ macro_rules! operation {
                 )?
             ]
         }
+    };
+    // * 逗号转发
+    (
+        $operator_name:expr
+        ,
+        $($param:expr $(,)?)*
+    ) => {
+        $crate::operation!(
+            $operator_name
+            => $($param)*
+        )
     };
 }
 
@@ -497,5 +508,24 @@ pub mod tests {
                 content: "other".into(),
             },
         ]
+    }
+
+    pub fn test_operation_macro() {
+        // 不带参操作
+        operation!("left");
+        // 带参操作：单个参数
+        operation!("left" => "{SELF}");
+        // 带参操作：多个参数（不带逗号）
+        operation!("left" => "{SELF}" "x");
+        operation!("left" => "{SELF}" "x" "y");
+        // 带参操作：多个参数（带逗号）
+        operation!("left" => "{SELF}", "x", "y", "z");
+        // 带参操作：单个参数（逗号而非箭头）
+        operation!("left", "{SELF}");
+        // 带参操作：多个参数（一个逗号）
+        operation!("left", "{SELF}" "x");
+        operation!("left", "{SELF}" "x" "y");
+        // 带参操作：多个参数（纯逗号）
+        operation!("left", "{SELF}", "x", "y", "z");
     }
 }

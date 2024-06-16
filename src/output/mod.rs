@@ -6,9 +6,11 @@
 //!
 //! [^1]: <https://github.com/ARCJ137442/BabelNAR.jl>
 
+// 数据结构
+mod structs;
+pub use structs::*;
+
 util::mods! {
-    // 数据结构
-    pub use structs;
 
     // 转换
     // * 🚩【2024-04-09 10:28:32】现在要求使用`serde`
