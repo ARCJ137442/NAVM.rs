@@ -417,12 +417,28 @@ impl From<Operation> for Vec<String> {
 /// 快捷构造宏
 #[macro_export]
 macro_rules! operation {
-    ($operator_name:expr => $($param:expr)*) => {
-        Operation{
+    (
+        $operator_name:expr
+        $(
+            => $($param:expr)*
+        )?
+    ) => {
+        $crate::output::structs::Operation {
             operator_name: $operator_name.into(),
-            params: vec![$(
-                FORMAT_ASCII.parse($param.as_str_ref()).unwrap().try_into_term().unwrap()
-            ),*]
+            // * 🚩参数列表
+            params: vec![
+                $(
+                    $(
+                        // * 🚩解析出参数词项
+                        narsese::conversion::string::impl_lexical::format_instances::
+                        FORMAT_ASCII
+                            .parse($param.as_ref())
+                            .unwrap()
+                            .try_into_term()
+                            .unwrap()
+                    ),*
+                )?
+            ]
         }
     };
 }
