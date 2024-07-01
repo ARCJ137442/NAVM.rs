@@ -6,23 +6,45 @@ use narsese::conversion::string::impl_lexical::format_instances::FORMAT_ASCII;
 use std::{error::Error, fmt::Display};
 use util::*;
 
+/// 固定的「空字串」常量
 /// * 📝定长数组非Copy初始化：如果需要在定长数组中初始化一个方法，应该先声明一个const，然后从中初始化
 const EMPTY_STRING: std::string::String = String::new();
+
 /// 封装「获取N个命令参数」的功能
-fn get_cmd_params<const N: usize>(s: &str) -> ParseResult<[String; N]> {
+/// * 🚩【2024-07-02 01:25:18】目前提取出两个函数的共同逻辑，其差异通过闭包体现
+#[inline(always)]
+fn _get_cmd_params<const N: usize>(
+    s: &str,
+    split_next_handler: impl Fn(Option<&str>) -> Result<&str, ParseError>,
+) -> ParseResult<[String; N]> {
+    // 先拆分空格（连续空格缩并）
     let mut split = s.split_whitespace();
 
     // 初始化，拷贝N个空字串
     let mut result: [String; N] = [EMPTY_STRING; N];
-    #[allow(clippy::needless_range_loop)] // ! 此处因为需要中断返回，所以无法用Clippy简化
-    for i in 0..N {
-        match split.next() {
-            None => return Err(ParseError(format!("参数个数不足{N}个！"))),
-            Some(s) => result[i].push_str(s),
-        }
+    for result_i in &mut result {
+        pipe! {
+            split.next() // 取下一个参数
+            => split_next_handler // 拆分下一个参数：取默认值，或报错
+            => {?}# // 错误上报
+            => [result_i.push_str] // 加入参数
+        };
     }
     // 开始拆分：过长⇒忽略，过短⇒报错
     Ok(result)
+}
+/// 封装「获取N个命令参数」的功能
+fn get_cmd_params<const N: usize>(s: &str) -> ParseResult<[String; N]> {
+    _get_cmd_params(s, |s| {
+        // 在「遇到空值」时报错
+        s.ok_or_else(|| ParseError(format!("参数个数不足{N}个！")))
+    })
+}
+
+/// 封装「获取N个命令参数」的功能，但对空值取空字串
+fn get_cmd_params_loose<const N: usize>(s: &str) -> ParseResult<[String; N]> {
+    // 在参数缺省时取空字串
+    _get_cmd_params(s, |s| Ok(s.unwrap_or("")))
 }
 
 /// 封装「指令解析结果」相关功能
@@ -70,9 +92,8 @@ impl super::Cmd {
             line.trim().is_empty() => Err(ParseError::new("尝试解析空行！"))
         }
         // 拆分字符串为两个部分
-        let (head, params) = line
-            .split_once(char::is_whitespace)
-            .ok_or(ParseError::new("无法分割出指令头！"))?;
+        // * 📜默认情况：整个指令都是指令头（无参数）
+        let (head, params) = line.split_once(char::is_whitespace).unwrap_or((line, ""));
         // 构造指令
         Self::parse_str_params(head, params)
     }
@@ -85,17 +106,17 @@ impl super::Cmd {
             // 内置：各自有各自的处理方法
             "SAV" => {
                 // 以空格分隔
-                let [target, path] = get_cmd_params::<2>(line)?;
+                let [target, path] = get_cmd_params_loose::<2>(line)?;
                 Cmd::SAV { target, path }
             }
             "LOA" => {
                 // 以空格分隔
-                let [target, path] = get_cmd_params::<2>(line)?;
+                let [target, path] = get_cmd_params_loose::<2>(line)?;
                 Cmd::LOA { target, path }
             }
             "RES" => {
-                // 以空格分隔
-                let [target] = get_cmd_params::<1>(line)?;
+                // 以空格分隔 | 此处为「松弛获取」：缺省的参数允许填充空格
+                let [target] = get_cmd_params_loose::<1>(line)?;
                 Cmd::RES { target }
             }
             "NSE" => {
@@ -128,19 +149,13 @@ impl super::Cmd {
             "CYC" => {
                 // 以空格分隔
                 let [num_str] = get_cmd_params::<1>(line)?;
-                let num = match num_str.parse::<usize>() {
-                    Ok(n) => n,
-                    Err(e) => return Err(to_parse_error(e)),
-                };
+                let num = num_str.parse::<usize>().transform_err(to_parse_error)?;
                 Cmd::CYC(num)
             }
             "VOL" => {
                 // 以空格分隔
                 let [num_str] = get_cmd_params::<1>(line)?;
-                let num = match num_str.parse::<usize>() {
-                    Ok(n) => n,
-                    Err(e) => return Err(to_parse_error(e)),
-                };
+                let num = num_str.parse::<usize>().transform_err(to_parse_error)?;
                 Cmd::VOL(num)
             }
             "REG" => {
@@ -150,12 +165,12 @@ impl super::Cmd {
             }
             "INF" => {
                 // 以空格分隔
-                let [target] = get_cmd_params::<1>(line)?;
-                Cmd::INF { source: target }
+                let [source] = get_cmd_params_loose::<1>(line)?;
+                Cmd::INF { source }
             }
             "HLP" => {
-                // 以空格分隔
-                let [name] = get_cmd_params::<1>(line)?;
+                // 以空格分隔 | 此处为「松弛获取」：缺省的参数允许填充空格
+                let [name] = get_cmd_params_loose::<1>(line)?;
                 Cmd::HLP { name }
             }
             "REM" => Cmd::REM {
@@ -192,29 +207,58 @@ mod test {
         dbg!(cmd)
     }
 
+    /// 工具函数/逐行测试
+    fn _test_lines(lines: &str) {
+        // 逐行解析
+        for line in lines.lines().map(str::trim).filter(|line| !line.is_empty()) {
+            _test_parse(line);
+        }
+    }
+
     /// 测试/解析
     #[test]
     fn test_parse() {
-        let cmd_lines = "
-        SAV target path
-        LOA target path
-        RES target
-        NSE <(&&, <A --> $B>, <#C --> +1>) --> ^D>. :|: %1.0; 0.9%
-        NEW reasoner
-        DEL reasoner
-        CYC 137
-        VOL 0
-        REG operator_name
-        INF memory
-        HLP self
-        REM this is a comment or remark
-        CUSTOM_HEAD tail
-        "
-        .trim();
+        _test_lines(
+            "
+            SAV target path
+            LOA target path
+            RES target
+            NSE <(&&, <A --> $B>, <#C --> +1>) --> ^D>. :|: %1.0; 0.9%
+            NEW reasoner
+            DEL reasoner
+            CYC 137
+            VOL 0
+            REG operator_name
+            INF memory
+            HLP self
+            REM this is a comment or remark
+            EXI reason of exit
+            CUSTOM_HEAD tail
+            ",
+        )
+    }
 
-        // 逐行解析
-        for line in cmd_lines.lines().map(str::trim) {
-            _test_parse(line);
-        }
+    /// 测试/解析/无附加参数的「松弛解析」
+    #[test]
+    fn test_parse_no_tail() {
+        _test_lines(
+            "
+            EXI
+            REM 以下均为「松弛解析」的用例
+
+            SAV
+            LOA
+            SAV reasoner
+            LOA reasoner
+            SAV reasoner ./saves/reasoner
+            LOA reasoner ./saves/reasoner
+            RES
+            RES resetted
+            INF
+            INF memory
+            HLP
+            HLP *
+            ",
+        )
     }
 }
