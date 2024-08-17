@@ -1,5 +1,8 @@
 # 构建目标
-/target
+target
 
 # 临时文件
 *tempCodeRunner*
+
+# 本机依赖配置
+Cargo.lock
