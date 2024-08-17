@@ -265,8 +265,8 @@ impl Output {
 
     /// 判断其「类型/头部」是否为指定的字串
     /// * ⚠️参数需要使用全大写的字符串，如"ANSWER"
-    pub fn is_type(&self, type_name: &str) -> bool {
-        self.type_name() == type_name
+    pub fn is_type(&self, type_name: impl AsRef<str>) -> bool {
+        self.type_name() == type_name.as_ref()
     }
 
     /// 获取Narsese（词法Narsese）
@@ -318,10 +318,13 @@ impl Operation {
     /// 构造函数
     /// * ℹ️若需从[`String`]与[`Vec`]直接构造，请直接使用结构体字面量语法
     ///   * 📄参见[`Operation`]
-    pub fn new(operator_name: &str, params: impl Iterator<Item = LexicalTerm>) -> Self {
+    pub fn new(
+        operator_name: impl Into<String>,
+        params: impl IntoIterator<Item = LexicalTerm>,
+    ) -> Self {
         Self {
             operator_name: operator_name.into(),
-            params: params.collect(),
+            params: params.into_iter().collect(),
         }
     }
 
@@ -329,8 +332,8 @@ impl Operation {
     /// * ℹ️若需从[`String`]与[`Vec`]直接构造，请直接使用结构体字面量语法
     ///   * 📄参见[`Operation`]
     pub fn try_from_strings(
-        operator_name: &str,
-        params_str: impl Iterator<Item = impl AsRef<str>>,
+        operator_name: impl Into<String>,
+        params_str: impl IntoIterator<Item = impl AsRef<str>>,
     ) -> Result<Self> {
         // 先解析参数
         let mut params = vec![];
