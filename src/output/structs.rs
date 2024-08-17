@@ -32,7 +32,7 @@ use narsese::{
     lexical::{Narsese as LexicalNarsese, Term as LexicalTerm},
 };
 use std::fmt::Display;
-use util::{AsStrRef, JoinTo};
+use util::JoinTo;
 
 /// NAVM输出类型
 /// * 🎯使用枚举，统一对「输出类别」分派
@@ -330,12 +330,12 @@ impl Operation {
     ///   * 📄参见[`Operation`]
     pub fn try_from_strings(
         operator_name: &str,
-        params_str: impl Iterator<Item = impl AsStrRef>,
+        params_str: impl Iterator<Item = impl AsRef<str>>,
     ) -> Result<Self> {
         // 先解析参数
         let mut params = vec![];
         for param in params_str {
-            let parsed = FORMAT_ASCII.parse(param.as_str_ref())?.try_into_term()?;
+            let parsed = FORMAT_ASCII.parse(param.as_ref())?.try_into_term()?;
             params.push(parsed);
         }
         // 构造自身并返回

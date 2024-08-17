@@ -1,6 +1,6 @@
 [package]
 name = "navm"
-version = "0.17.0"
+version = "0.17.1"
 edition = "2021"
 description = """
 Definitions and APIs for the NAVM (Non-Axiomatic Virtual Machine) model
@@ -47,7 +47,7 @@ version = "1.0.81"
 [dependencies.nar_dev_utils]
 # 【2024-03-13 21:17:55】实用库现在独立为`nar_dev_utils`
 # * 【2024-03-13 22:36:05】目前只启用它的宏
-version = "0" # * ✅现已发布至`crates.io`
+version = "0.38.0" # * ✅现已发布至`crates.io`
 # path = "../NAR-dev-util"
 # git = "https://github.com/ARCJ137442/NAR-dev-util"
 # ! 【2024-03-23 19:19:01】似乎Rust-Analyzer无法获取私有仓库数据
@@ -57,7 +57,7 @@ features = []
 # ! 本地依赖可以不添加版本
 # 载入Narsese API，引入其中的「词法Narsese」部分
 # path = "../Narsese.rs"
-version = "0" # * ✅现已发布至`crates.io`
+version = "0.21.2" # * ✅现已发布至`crates.io`
 # git = "https://github.com/ARCJ137442/Narsese.rs"
 # ! 【2024-03-23 19:19:01】似乎Rust-Analyzer无法获取私有仓库数据
 features = ["lexical_narsese"]
