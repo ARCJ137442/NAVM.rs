@@ -132,7 +132,7 @@ Goal: `term! :|: %1.0; 0.9%`
 
 Question: `term? :|:`
 
-Request: `term@ :|:`
+Quest: `term@ :|:`
 
 Judgment/Single truth value: `term. :|: %1%`
 
@@ -140,7 +140,7 @@ Goal/Single truth value: `term! :|: %1%`
 
 Question/No timestamp: `term?`
 
-Request/No timestamp: `term@`
+Quest/No timestamp: `term@`
 
 Judgment/Empty truth value: `term. :|:`
 
