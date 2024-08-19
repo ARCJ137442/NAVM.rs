@@ -1,5 +1,7 @@
 # NAVM - Non-Axiomatic Virtual Machine | 非公理虚拟机
 
+**简体中文** | [English](./README.en.md)
+
     🏗️项目的**英文文档**尚在筹建，有意者欢迎提交PR
     The **English document** of the project is still under preparation. PR is welcome.
 

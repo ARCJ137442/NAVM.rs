@@ -4,7 +4,7 @@
 
 📍最后更新：【2024-04-10 15:39:31】
 
-## CIN (Computer Implement of NARS)
+## CIN (Computer Implementation of NARS)
 
 - 「NARS计算机实现」之英文缩写
 

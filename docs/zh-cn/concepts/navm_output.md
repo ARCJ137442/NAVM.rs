@@ -76,8 +76,10 @@ CIN输出一个NAL-8意义上的「操作」，指示「对外部过程的调用
 - ✏️原始内容：字符串
 - ✏️操作：NARS操作
   - ✏️操作符名：字符串 | 📄如`left`，不带语法上的尖号
-  - ✏️操作参数：词法Narsese词项数组
+  - ✏️操作参数：词法Narsese词项数组 | 字符串数组
 - 📄OpenNARS: `EXE: $0.00;0.04;0.55$ ^left([{SELF}, (*,P1,P2)])=null`
+  - 操作符名：`left`
+  - 操作参数：`["{SELF}", "(*,P1,P2)"]`
 
 #### **`INFO`**
 
@@ -155,4 +157,4 @@ export type NARSOutput = {
 }
 ```
 
-另请参考源码中有关[`OutputJSON`](https://github.com/ARCJ137442/NAVM.rs/blob/main/src/output/conversion.rs)的定义
+另可参考源码中有关[`OutputJSON`](https://github.com/ARCJ137442/NAVM.rs/blob/main/src/output/conversion.rs)的定义

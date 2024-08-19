@@ -161,16 +161,16 @@ NAVM指令采用类似汇编语言`【指令头】 【指令内容】…`的语�
 
 |指令类型|语法|
 |:-:|:--|
-|SAV|`SAV 【目标】 【路径】`|
-|LOA|`LOA 【目标】 【路径】`|
-|RES|`RES 【目标】`|
-|NSE|`NSE 【CommonNarsese 语句/任务】`|
-|NEW|`NEW 【名称】`|
-|DEL|`DEL 【名称】`|
-|CYC|`CYC 【步数】`|
-|VOL|`VOL 【音量】`|
-|REG|`REG 【操作符名】`|
-|INF|`INF 【来源】`|
-|HLP|`HLP 【名称】`|
-|REM|`REM 【单行注释】`|
-|Custom|`【任何表外指令头】 【任何单行内容】`|
+|SAV|`SAV <目标> [路径]`|
+|LOA|`LOA <目标> [路径]`|
+|RES|`RES [目标]`|
+|NSE|`NSE <CommonNarsese 语句/任务>`|
+|NEW|`NEW <名称>`|
+|DEL|`DEL <名称>`|
+|CYC|`CYC <步数>`|
+|VOL|`VOL <音量>`|
+|REG|`REG <操作符名>`|
+|INF|`INF <来源>`|
+|HLP|`HLP [名称]`|
+|REM|`REM [单行注释]`|
+|Custom|`<任何表外指令头> [任何单行内容]`|
