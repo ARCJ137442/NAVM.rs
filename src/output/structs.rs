@@ -27,12 +27,12 @@
 //! 🔗[GitHub链接](https://github.com/ARCJ137442/BabelNAR.jl/blob/main/src/CIN/struct/NARSOutputType.jl)
 
 use anyhow::Result;
+use nar_dev_utils::JoinTo;
 use narsese::{
     conversion::string::impl_lexical::format_instances::FORMAT_ASCII,
     lexical::{Narsese as LexicalNarsese, Term as LexicalTerm},
 };
 use std::fmt::Display;
-use util::JoinTo;
 
 /// NAVM输出类型
 /// * 🎯使用枚举，统一对「输出类别」分派

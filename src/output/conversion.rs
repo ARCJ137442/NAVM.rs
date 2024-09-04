@@ -24,9 +24,9 @@
 
 use super::{Operation, Output};
 use anyhow::{anyhow, Result};
+use nar_dev_utils::{list, manipulate, pipe};
 use narsese::conversion::string::impl_lexical::format_instances::FORMAT_ASCII;
 use serde::{Deserialize, Serialize};
-use util::{list, manipulate, pipe};
 
 /// 用于统一存储「JSON化的NAVM输出」的结构
 /// * 🎯对包含各种不同字段的枚举[`Output`]进行信息压缩
@@ -306,7 +306,7 @@ mod tests {
     #[test]
     #[cfg(feature = "serde_json")]
     fn test_json_str() {
-        use util::asserts;
+        use nar_dev_utils::asserts;
 
         let samples = test_samples();
         // 各个样本的测试

@@ -2,9 +2,9 @@
 //! * 从字符串简要解析出NAVM指令指令类型
 
 use super::Cmd;
+use nar_dev_utils::{if_return, pipe};
 use narsese::conversion::string::impl_lexical::format_instances::FORMAT_ASCII;
 use std::{error::Error, fmt::Display};
-use util::*;
 
 /// 固定的「空字串」常量
 /// * 📝定长数组非Copy初始化：如果需要在定长数组中初始化一个方法，应该先声明一个const，然后从中初始化
@@ -127,12 +127,10 @@ impl super::Cmd {
                     // 尝试解析
                     .parse(line)
                     // 转换其中的错误类型
-                    .transform_err(to_parse_error)?;
+                    .map_err(to_parse_error)?;
                 // 尝试进行隐式转换，以统一使用`Task`类型
                 // * ⚠️其中的「语句」将会被转换为「空预算任务」
-                let task = narsese
-                    .try_into_task_compatible()
-                    .transform_err(to_parse_error)?;
+                let task = narsese.try_into_task_compatible().map_err(to_parse_error)?;
                 // 返回
                 Cmd::NSE(task)
             }
@@ -149,13 +147,13 @@ impl super::Cmd {
             "CYC" => {
                 // 以空格分隔
                 let [num_str] = get_cmd_params::<1>(line)?;
-                let num = num_str.parse::<usize>().transform_err(to_parse_error)?;
+                let num = num_str.parse::<usize>().map_err(to_parse_error)?;
                 Cmd::CYC(num)
             }
             "VOL" => {
                 // 以空格分隔
                 let [num_str] = get_cmd_params::<1>(line)?;
-                let num = num_str.parse::<usize>().transform_err(to_parse_error)?;
+                let num = num_str.parse::<usize>().map_err(to_parse_error)?;
                 Cmd::VOL(num)
             }
             "REG" => {

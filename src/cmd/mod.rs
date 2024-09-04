@@ -1,6 +1,6 @@
 //! 提供对「NAVM指令」的数据结构、解析支持
 
-util::mod_and_pub_use! {
+nar_dev_utils::mod_and_pub_use! {
     // 结构
     structs
     // 格式化
@@ -13,7 +13,7 @@ util::mod_and_pub_use! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use util::asserts;
+    use nar_dev_utils::asserts;
 
     /// 测试/转换
     /// * 🎯解析、格式化的稳定性：相等的指令
