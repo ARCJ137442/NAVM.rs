@@ -65,11 +65,16 @@ pub struct OutputJSON {
 /// * ✅【2024-04-09 10:31:23】现在接入[`serde_json`]以实现序列化
 ///   * ✨可选择性禁用
 ///   * ⚠️理论上不会失败（字符串/字符串数组）
+/// * 🚩【2024-09-14 15:24:14】现在直接实现[`std::fmt::Display`]
+///   * 📌clippy推荐：[`clippy::to_string_trait_impl`](https://rust-lang.github.io/rust-clippy/master/index.html#to_string_trait_impl)
+///   * 📝实现[`std::fmt::Display`]可以自动实现[`ToString`]，并且对此JSON数据类型无伤大雅
+///   * 📌复用[`std::fmt::Error`]（零尺寸结构体ZST）以减少手动panic
 #[cfg(feature = "serde_json")]
-impl ToString for OutputJSON {
-    fn to_string(&self) -> String {
-        // *
-        serde_json::to_string(self).expect("数据序列化失败")
+impl std::fmt::Display for OutputJSON {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // .expect("数据序列化失败")
+        let string = serde_json::to_string(self).map_err(|_| std::fmt::Error)?;
+        f.write_str(&string)
     }
 }
 
