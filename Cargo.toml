@@ -1,6 +1,6 @@
 [package]
 name = "navm"
-version = "0.17.3"
+version = "0.17.4"
 edition = "2021"
 description = """
 Definitions and APIs for the NAVM (Non-Axiomatic Virtual Machine) model
@@ -17,6 +17,7 @@ repository = "https://github.com/ARCJ137442/NAVM.rs"
 
 # Cargo文档参考：<https://rustwiki.org/zh-CN/cargo/reference/manifest.html>
 
+
 [features]
 # 默认全部启用
 default = ["bundled"]
@@ -29,25 +30,24 @@ serde = ["dep:serde"]
 # * 🚩【2024-04-13 15:20:23】现在需要以`serde`作为前置特性
 serde_json = ["serde", "dep:serde_json"]
 
+
 [dependencies]
+anyhow = "1.0.88"
 
 # 用于NAVM输出的序列化/反序列化
 [dependencies.serde]
-version = "1.0.197"
+version = "1.0.210"
 features = ["derive"]
 optional = true
 
 [dependencies.serde_json]
-version = "1.0.115"
+version = "1.0.128"
 optional = true
-
-[dependencies.anyhow]
-version = "1.0.81"
 
 [dependencies.nar_dev_utils]
 # 【2024-03-13 21:17:55】实用库现在独立为`nar_dev_utils`
 # * 【2024-03-13 22:36:05】目前只启用它的宏
-version = "0.40" # * ✅现已发布至`crates.io`
+version = "0.42" # * ✅现已发布至`crates.io`
 # path = "../NAR-dev-util"
 # git = "https://github.com/ARCJ137442/NAR-dev-util"
 # ! 【2024-03-23 19:19:01】似乎Rust-Analyzer无法获取私有仓库数据
@@ -57,7 +57,20 @@ features = ["bundled"]
 # ! 本地依赖可以不添加版本
 # 载入Narsese API，引入其中的「词法Narsese」部分
 # path = "../Narsese.rs"
-version = "0.21.2" # * ✅现已发布至`crates.io`
+version = "0.21" # * ✅现已发布至`crates.io`
 # git = "https://github.com/ARCJ137442/Narsese.rs"
 # ! 【2024-03-23 19:19:01】似乎Rust-Analyzer无法获取私有仓库数据
 features = ["lexical_narsese"]
+
+
+# 有关Clippy的参考：
+# * 🔗<https://doc.rust-lang.org/clippy/configuration.html>
+[lints.clippy]
+
+# 📌【2024-08-25 00:31:01】允许文档注释中出现以下情况
+# ```markdown
+# * 📝这是一个笔记
+# ? 💭这是一个问题
+#   * 📍这是问题下的一个小点
+# ```
+doc_lazy_continuation = "allow"
